@@ -1,0 +1,133 @@
+{
+  "providers": [
+    {
+      "name": "CineSrc",
+      "enabled": true,
+      "movie": "https://cinesrc.st/embed/movie/{id}",
+      "tv": "https://cinesrc.st/embed/tv/{id}?s={season}&e={episode}"
+    },
+    {
+      "name": "FilmU",
+      "enabled": true,
+      "movie": "https://vidly.pro/movie/{id}",
+      "tv": "https://vidly.pro/tv/{id}/{season}/{episode}"
+    },
+    {
+      "name": "2Embed",
+      "enabled": true,
+      "movie": "https://www.2embed.cc/embed/{id}",
+      "tv": "https://www.2embed.cc/embedtv/{id}&s={season}&e={episode}"
+    },
+    {
+      "name": "VidLink",
+      "enabled": true,
+      "movie": "https://vidlink.pro/movie/{id}",
+      "tv": "https://vidlink.pro/tv/{id}/{season}/{episode}"
+    },
+    {
+      "name": "VidRift",
+      "enabled": true,
+      "movie": "https://embed.vidrift.net/embed/movie/{id}",
+      "tv": "https://embed.vidrift.net/embed/tv/{id}/{season}/{episode}"
+    },
+    {
+      "name": "SuperEmbed",
+      "enabled": true,
+      "movie": "https://multiembed.mov/?video_id={id}&tmdb=1",
+      "tv": "https://multiembed.mov/?video_id={id}&tmdb=1&s={season}&e={episode}"
+    },
+    {
+      "name": "SmashyStream",
+      "enabled": true,
+      "movie": "https://embed.smashystream.com/playere.php?tmdb={id}",
+      "tv": "https://embed.smashystream.com/playere.php?tmdb={id}&season={season}&episode={episode}",
+      "note": "Community-referenced player endpoint; availability remains unverified."
+    },
+    {
+      "name": "VidEasy",
+      "enabled": true,
+      "movie": "https://player.videasy.net/movie/{id}",
+      "tv": "https://player.videasy.net/tv/{id}/{season}/{episode}",
+      "note": "Updated to the current public route form documented by a recent integration example."
+    },
+    {
+      "name": "VidSrc.cc",
+      "enabled": true,
+      "movie": "https://vidsrc.cc/v2/embed/movie/{id}",
+      "tv": "https://vidsrc.cc/v2/embed/tv/{id}/{season}/{episode}"
+    },
+    {
+      "name": "RiveStream",
+      "enabled": true,
+      "movie": "https://watch.rivestream.app/embed/agg?type=movie&id={id}",
+      "tv": "https://watch.rivestream.app/embed/agg?type=tv&id={id}&season={season}&episode={episode}"
+    },
+    {
+      "name": "Embed.su",
+      "enabled": false,
+      "movie": "https://embed.su/embed/movie/{id}",
+      "tv": "https://embed.su/embed/tv/{id}/{season}/{episode}",
+      "note": "Retired/unavailable: vidsrc.pro redirects to this domain, which currently displays a domain-for-sale page."
+    },
+    {
+      "name": "VidSrc.pro",
+      "enabled": false,
+      "movie": "https://vidsrc.pro/embed/movie/{id}",
+      "tv": "https://vidsrc.pro/embed/tv/{id}/{season}/{episode}",
+      "note": "Retired/unavailable: currently redirects to embed.su, which displays a domain-for-sale page."
+    },
+    {
+      "name": "NonoFlix",
+      "enabled": false,
+      "movie": "https://nonoflix.xyz/embed/movie/{id}",
+      "tv": "https://nonoflix.xyz/embed/tv/{id}/{season}/{episode}",
+      "note": "Disabled pending a reachable, documented current endpoint; current web checks did not confirm an active player endpoint."
+    },
+    {
+      "name": "HydraStream",
+      "enabled": false,
+      "movie": "https://hydrastream.lol/embed/movie/{id}",
+      "tv": "https://hydrastream.lol/embed/tv/{id}/{season}/{episode}",
+      "note": "Disabled pending a reachable, documented current endpoint; current web checks did not confirm an active player endpoint."
+    },
+    {
+      "name": "YapGrid",
+      "enabled": true,
+      "movie": "https://yapgrid.com/embed/movie/{id}?autoplay=1",
+      "tv": "https://yapgrid.com/embed/tv/{id}/{season}/{episode}?autoplay=1"
+    },
+    {
+      "name": "VidPlus",
+      "enabled": true,
+      "movie": "https://player.vidplus.to/embed/movie/{id}",
+      "tv": "https://player.vidplus.to/embed/tv/{id}/{season}/{episode}"
+    },
+    {
+      "name": "VidZee",
+      "enabled": true,
+      "movie": "https://player.vidzee.wtf/embed/movie/{id}",
+      "tv": "https://player.vidzee.wtf/embed/tv/{id}/{season}/{episode}"
+    },
+    {
+      "name": "Frembed",
+      "enabled": true,
+      "movie": "https://www.frembed.bar/embed/movie/{id}",
+      "tv": "https://www.frembed.bar/embed/serie/{id}?sa={season}&epi={episode}",
+      "note": "Uses the documented serie endpoint and current www domain."
+    },
+    {
+      "name": "PrimeWire Embed",
+      "enabled": true,
+      "movie": "https://www.primewire.tf/embed/movie?tmdb={id}",
+      "tv": "https://www.primewire.tf/embed/tv?tmdb={id}&season={season}&episode={episode}",
+      "note": "Updated route/domain from recent public integration example; host availability is not guaranteed."
+    },
+    {
+      "name": "P-Stream",
+      "enabled": true,
+      "movie": "https://iframe.pstream.org/embed/tmdb-movie-{id}",
+      "tv": "https://iframe.pstream.org/embed/tmdb-tv-{id}/{season}/{episode}",
+      "note": "Replaced unsupported p-stream.club route with documented integration route."
+    }
+  ]
+}

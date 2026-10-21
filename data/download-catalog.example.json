@@ -1,0 +1,49 @@
+{
+  "movies": {
+    "12345": {
+      "title": "Example Licensed Movie",
+      "qualities": [
+        {
+          "id": "1080p",
+          "label": "1080p Full HD",
+          "height": 1080,
+          "bitrate": 6500000,
+          "file": "movies/example-movie-1080p.mp4",
+          "filename": "Example-Movie-1080p.mp4"
+        },
+        {
+          "id": "720p",
+          "label": "720p HD",
+          "height": 720,
+          "bitrate": 3000000,
+          "file": "movies/example-movie-720p.mp4",
+          "filename": "Example-Movie-720p.mp4"
+        }
+      ]
+    }
+  },
+  "tv": {
+    "67890": {
+      "title": "Example Licensed Series",
+      "seasons": {
+        "1": {
+          "episodes": {
+            "1": {
+              "title": "Example Episode",
+              "qualities": [
+                {
+                  "id": "1080p",
+                  "label": "1080p Full HD",
+                  "height": 1080,
+                  "bitrate": 5000000,
+                  "file": "tv/example-series/season-01/episode-01-1080p.mp4",
+                  "filename": "Example-Series-S01E01-1080p.mp4"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

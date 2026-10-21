@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "test": "node --test",
+    "check": "node --check server.js && node --check lib/provider-downloads.js && node --check lib/embed-providers.js && node --check lib/download-range.js && node --check lib/download-http.js && node --check public/assets/app.js"
   },
   "engines": {
     "node": ">=20"

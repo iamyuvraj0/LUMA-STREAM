@@ -3,17 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#08090c" />
-  <meta name="description" content="LUMA Stream — a cinematic movie and TV discovery interface powered by TMDB." />
-  <title>LUMA Stream</title>
-  <script>try{const s=JSON.parse(localStorage.getItem('luma-settings')||'{}');const t=s.theme==='light'?'light':s.theme==='system'?(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'):'dark';document.documentElement.dataset.theme=t}catch{document.documentElement.dataset.theme=localStorage.getItem('luma-theme')||'dark';}</script>
+  <meta id="meta-theme-color" name="theme-color" content="#08090c" />
+  <meta id="meta-description" name="description" content="Discover movies, television series and people with LUMA Stream's cinematic catalogue." />
+  <meta id="meta-robots" name="robots" content="index,follow,max-image-preview:large" />
+  <meta id="meta-og-site-name" property="og:site_name" content="LUMA Stream" />
+  <meta id="meta-og-type" property="og:type" content="website" />
+  <meta id="meta-og-title" property="og:title" content="LUMA Stream - Discover Movies &amp; TV" />
+  <meta id="meta-og-description" property="og:description" content="Discover movies, television series and people with LUMA Stream's cinematic catalogue." />
+  <meta id="meta-og-url" property="og:url" content="/" />
+  <meta id="meta-og-image" property="og:image" content="/assets/luma-social.png" />
+  <meta id="meta-og-image-alt" property="og:image:alt" content="LUMA Stream - cinematic movie and television discovery" />
+  <meta id="meta-twitter-card" name="twitter:card" content="summary_large_image" />
+  <meta id="meta-twitter-title" name="twitter:title" content="LUMA Stream - Discover Movies &amp; TV" />
+  <meta id="meta-twitter-description" name="twitter:description" content="Discover movies, television series and people with LUMA Stream's cinematic catalogue." />
+  <meta id="meta-twitter-image" name="twitter:image" content="/assets/luma-social.png" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta name="application-name" content="LUMA Stream" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://api.themoviedb.org" />
+  <link id="canonical-link" rel="canonical" href="/" />
+  <script id="seo-jsonld" type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"LUMA Stream","url":"/"}</script>
+  <title>LUMA Stream - Discover Movies &amp; TV</title>
+  <script>try{let s={};try{s=JSON.parse(localStorage.getItem('luma-settings')||'{}')||{}}catch{}const t=s.theme==='light'?'light':s.theme==='system'?(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'):'dark';document.documentElement.dataset.theme=t}catch{document.documentElement.dataset.theme='dark'}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://image.tmdb.org" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" />
   <link rel="stylesheet" href="/assets/styles.css" />
 </head>
 <body>
-  <div id="app"></div>
+  <div id="app"><!--LUMA-SEO-CONTENT--></div>
   <div id="toast-root" aria-live="polite"></div>
   <script type="module" src="/assets/app.js"></script>
 </body>
