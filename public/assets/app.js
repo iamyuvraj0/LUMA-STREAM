@@ -124,6 +124,8 @@ const icon = {
   layers: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 8 4-8 4-8-4 8-4Z"/><path d="m4 12 8 4 8-4M4 16l8 4 8-4"/></svg>',
   chevron: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>',
   arrowUp: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>',
+  github: '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="icon-fill" d="M12 .75a11.25 11.25 0 0 0-3.56 21.92c.56.1.77-.24.77-.54v-1.9c-3.14.68-3.8-1.34-3.8-1.34-.51-1.3-1.25-1.65-1.25-1.65-1.02-.7.08-.68.08-.68 1.13.08 1.73 1.16 1.73 1.16 1 .1.74 2.24 3.13 1.7.1-.73.39-1.23.71-1.51-2.5-.28-5.14-1.25-5.14-5.55 0-1.23.44-2.24 1.16-3.03-.12-.28-.5-1.43.11-2.98 0 0 .95-.3 3.1 1.16a10.8 10.8 0 0 1 5.64 0c2.15-1.46 3.1-1.16 3.1-1.16.61 1.55.23 2.7.11 2.98.72.79 1.16 1.8 1.16 3.03 0 4.31-2.64 5.26-5.16 5.54.4.35.76 1.03.76 2.08v3.1c0 .3.2.65.78.54A11.25 11.25 0 0 0 12 .75Z"/></svg>',
+  mail: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m4.5 7 7.5 5.7L19.5 7"/></svg>',
   home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 10 8-6 8 6v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9Z"/><path d="M9 20v-6h6v6"/></svg>',
   list: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
   menu: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
@@ -147,10 +149,10 @@ const icon = {
 };
 
 
-function setPageMetadata({ title = 'Discover Movies & TV', description = 'Discover movies, television series and people with LUMA Stream’s cinematic catalogue.', image = null, path = location.pathname || '/', robots = 'index,follow', preloadImage = false, type = 'website' } = {}) {
+function setPageMetadata({ title = 'Discover Movies & TV', description = 'Discover movies, television series and people with STREAM SUNAA’s cinematic catalogue.', image = null, path = location.pathname || '/', robots = 'index,follow', preloadImage = false, type = 'website' } = {}) {
   const titleText = String(title || 'Discover Movies & TV').replace(/\u2014/g, '-');
-  let fullTitle = titleText === 'LUMA Stream' ? titleText : titleText === 'Discover Movies & TV' ? 'LUMA Stream - Discover Movies & TV' : `${titleText} | LUMA Stream`;
-  if (fullTitle.length > 65) { const suffix = ' | LUMA Stream'; const source = titleText.replace(/\s*\|\s*LUMA Stream$/i, ''); const maxBase = 65 - suffix.length; const clipped = source.slice(0, maxBase - 1); const boundary = clipped.lastIndexOf(' '); fullTitle = `${(boundary > maxBase * 0.6 ? clipped.slice(0, boundary) : clipped).trim()}…${suffix}`; }
+  let fullTitle = titleText === 'STREAM SUNAA' ? titleText : titleText === 'Discover Movies & TV' ? 'STREAM SUNAA - Discover Movies & TV' : `${titleText} | STREAM SUNAA`;
+  if (fullTitle.length > 65) { const suffix = ' | STREAM SUNAA'; const source = titleText.replace(/\s*\|\s*STREAM SUNAA$/i, ''); const maxBase = 65 - suffix.length; const clipped = source.slice(0, maxBase - 1); const boundary = clipped.lastIndexOf(' '); fullTitle = `${(boundary > maxBase * 0.6 ? clipped.slice(0, boundary) : clipped).trim()}…${suffix}`; }
   const canonicalPath = String(path || '/').split('?')[0] || '/';
   const canonical = new URL(canonicalPath, location.origin).href;
   const safeImage = (() => {
@@ -159,13 +161,13 @@ function setPageMetadata({ title = 'Discover Movies & TV', description = 'Discov
       return ['http:', 'https:'].includes(url.protocol) ? url.href : new URL('/assets/luma-social.png', location.origin).href;
     } catch { return new URL('/assets/luma-social.png', location.origin).href; }
   })();
-  const cleanDescription = String(description || 'Discover movies, television series and people with LUMA Stream’s cinematic catalogue.').replace(/\u2014/g, '-').replace(/\s+/g, ' ').trim().slice(0, 160);
+  const cleanDescription = String(description || 'Discover movies, television series and people with STREAM SUNAA’s cinematic catalogue.').replace(/\u2014/g, '-').replace(/\s+/g, ' ').trim().slice(0, 160);
   document.title = fullTitle;
   const values = {
     'meta-description': cleanDescription,
     'meta-robots': `${robots}${String(robots).includes('max-image-preview:large') ? '' : ',max-image-preview:large'}`,
     'meta-theme-color': document.documentElement.dataset.theme === 'light' ? '#f0ede7' : '#08090c',
-    'meta-og-site-name': 'LUMA Stream',
+    'meta-og-site-name': 'STREAM SUNAA',
     'meta-og-type': type,
     'meta-og-title': fullTitle,
     'meta-og-description': cleanDescription,
@@ -190,7 +192,7 @@ function setPageMetadata({ title = 'Discover Movies & TV', description = 'Discov
     const schemaType = detailMatch ? (detailMatch[1] === 'tv' ? 'TVSeries' : 'Movie') : personMatch ? 'Person' : canonicalPath === '/' ? 'WebSite' : 'WebPage';
     const schemaName = detailMatch ? titleText.replace(/\s*-\s*(?:Movie|TV Series)$/i, '') : personMatch ? titleText.replace(/\s*-\s*Filmography$/i, '') : fullTitle;
     const schema = { '@context': 'https://schema.org', '@type': schemaType, name: schemaName, description: cleanDescription, url: canonical };
-    if (schemaType === 'WebSite') schema.name = 'LUMA Stream';
+    if (schemaType === 'WebSite') schema.name = 'STREAM SUNAA';
     if (['Person', 'Movie', 'TVSeries'].includes(schemaType)) schema.image = safeImage;
     else if (schemaType !== 'WebSite') schema.primaryImageOfPage = safeImage;
     jsonLd.textContent = JSON.stringify(schema);
@@ -409,7 +411,7 @@ function gradientSettingsMarkup() {
   const g = state.settings.gradient || DEFAULT_GRADIENT;
   const tempoIndex = Math.max(0, Math.min(3, Number(g.tempo) || 0));
   return `<div class="gradient-settings-card">
-    <div class="gradient-settings-head"><div><span class="gradient-mini-kicker">Ambient system</span><h3>Gradient background</h3><p>Customize the atmosphere across every LUMA page.</p></div><span class="gradient-current-name" id="gradient-current-name">${escapeHtml(g.palette || 'Custom mix')}</span></div>
+    <div class="gradient-settings-head"><div><span class="gradient-mini-kicker">Ambient system</span><h3>Gradient background</h3><p>Customize the atmosphere across every STREAM SUNAA page.</p></div><span class="gradient-current-name" id="gradient-current-name">${escapeHtml(g.palette || 'Custom mix')}</span></div>
     <div class="gradient-palette-search-wrap">
       <div class="liquid-search gradient-palette-search" id="gradient-palette-search">
         <div class="search-goo" aria-hidden="true"><b></b><i></i></div>
@@ -569,7 +571,7 @@ function nav(active = '') {
   }));
   return `<a href="#main-content" class="skip-link">Skip to main content</a>
   <header class="site-header"><div class="header-inner">
-    <a class="brand" href="/" data-link aria-label="LUMA home"><span class="brand-mark">L</span><span class="brand-word">LUMA</span></a>
+    <a class="brand" href="/" data-link aria-label="STREAM SUNAA home"><span class="brand-mark">S</span><span class="brand-word">STREAM SUNAA</span></a>
     <div class="header-actions">
       <button class="header-icon" type="button" data-global-search-toggle title="Search" aria-label="Search movies, series and people" aria-haspopup="dialog">${iconWrap('search')}</button>
       <a class="header-icon ${active==='settings'?'active':''}" href="/settings" data-link title="Settings" aria-label="Settings">${iconWrap('settings')}</a>
@@ -581,7 +583,7 @@ function nav(active = '') {
     ${links.map(([key,href,label,iconName])=>`<a class="bottom-nav-link ${currentClass(key)}" href="${href}" data-link ${currentClass(key)?'aria-current="page"':''}>${iconWrap(iconName)}<span>${label}</span></a>`).join('')}
   </nav>
   <div class="global-search-scrim" id="global-search-scrim" hidden></div>
-  <section class="global-search-panel" id="global-search-panel" role="dialog" aria-modal="true" aria-label="Search LUMA" aria-hidden="true" hidden>
+  <section class="global-search-panel" id="global-search-panel" role="dialog" aria-modal="true" aria-label="Search STREAM SUNAA" aria-hidden="true" hidden>
     <div class="global-search-header"><span class="gradient-mini-kicker">Find your next watch</span><button type="button" class="global-search-close" id="global-search-close" aria-label="Close search">${iconWrap('close')}</button></div>
     <div class="liquid-search global-liquid-search" id="global-liquid-search">
       <div class="search-goo" aria-hidden="true"><b></b><i></i></div>
@@ -597,14 +599,18 @@ function footer() {
   return `<footer class="footer">
     <div class="footer-main">
       <div class="footer-brand-block">
-        <a class="footer-brand" href="/" data-link><span class="footer-mark">L</span><span>LUMA</span></a>
+        <a class="footer-brand" href="/" data-link><span class="footer-mark">S</span><span>STREAM SUNAA</span></a>
         <p>A cinematic discovery interface built around fast browsing, clean metadata and a focused watch flow.</p>
+        <div class="footer-contact-links" aria-label="Contact and social links">
+          <a href="https://github.com/iamyuvraj0" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile for iamyuvraj0">${iconWrap('github')}<span>GitHub</span></a>
+          <a href="mailto:contact.sunaa@gmail.com" aria-label="Email contact.sunaa@gmail.com">${iconWrap('mail')}<span>contact.sunaa@gmail.com</span></a>
+        </div>
       </div>
       <div class="footer-column"><span class="footer-label">Explore</span><a href="/movies" data-link>Movies</a><a href="/tv" data-link>Series</a><button type="button" class="footer-search-action" data-open-global-search>Search</button></div>
       <div class="footer-column"><span class="footer-label">Library</span><a href="/my-list" data-link>My List</a><a href="/history" data-link>History</a><a href="/about" data-link>About</a></div>
-      <div class="footer-note"><span class="footer-label">Data & credits</span><p>LUMA uses the <a href="https://www.themoviedb.org/" target="_blank" rel="noreferrer">TMDB API</a> for metadata, artwork and provider data. LUMA is not endorsed or certified by TMDB.</p></div>
+      <div class="footer-note"><span class="footer-label">Data & credits</span><p>STREAM SUNAA uses the <a href="https://www.themoviedb.org/" target="_blank" rel="noreferrer">TMDB API</a> for metadata, artwork and provider data. STREAM SUNAA is not endorsed or certified by TMDB.</p></div>
     </div>
-    <div class="footer-bottom"><span>© ${new Date().getFullYear()} LUMA</span><span>Built for discovery</span><button class="footer-top" data-top>Back to top ${iconWrap('arrowUp')}</button></div>
+    <div class="footer-bottom"><span>© ${new Date().getFullYear()} STREAM SUNAA</span><span>Built for discovery</span><button class="footer-top" data-top>Back to top ${iconWrap('arrowUp')}</button></div>
   </footer>`;
 }
 
@@ -641,7 +647,7 @@ function skeletonCardsMarkup(count = 8) {
   return Array.from({ length: Math.max(1, Math.min(16, count)) }, () => `<div class="skeleton-card" aria-hidden="true"><div class="skeleton skeleton-poster"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>`).join('');
 }
 function skeletonRail(title = 'Loading picks') {
-  return `<section class="section skeleton-section" aria-busy="true"><div class="section-header"><div><span class="section-kicker">LUMA picks</span><h2>${escapeHtml(title)}</h2></div></div><div class="rail-wrap"><div class="card-row skeleton-row">${skeletonCardsMarkup(7)}</div></div></section>`;
+  return `<section class="section skeleton-section" aria-busy="true"><div class="section-header"><div><span class="section-kicker">STREAM SUNAA picks</span><h2>${escapeHtml(title)}</h2></div></div><div class="rail-wrap"><div class="card-row skeleton-row">${skeletonCardsMarkup(7)}</div></div></section>`;
 }
 
 function hero(item, index = state.heroIndex, total = state.heroItems.length) {
@@ -654,7 +660,7 @@ function hero(item, index = state.heroIndex, total = state.heroItems.length) {
       <h1>${escapeHtml(item?.title || 'Find something worth watching.')}</h1>
       <div class="meta-row"><span>${year(item?.release_date)}</span><span class="dot"></span><span>${item?.media_type==='tv'?'Series':'Movie'}</span><span class="dot"></span><span>${iconWrap('star')} ${rating(item?.vote_average)}</span></div>
       <p class="hero-copy">${escapeHtml(item?.overview || 'Fresh titles, ready to discover.')}</p>
-      <div class="hero-actions"><a class="btn primary" href="${item ? `/watch/${mediaType(item)}/${item.id}` : '/movies'}" data-link>${iconWrap('play')} Watch now</a>${item ? `<a class="btn secondary" href="${detailHref(item)}" data-link>${iconWrap('info')} More info</a>` : ''}</div>
+      <div class="hero-actions"><a class="btn primary hero-action-circle" href="${item ? `/watch/${mediaType(item)}/${item.id}` : '/movies'}" data-link aria-label="Watch now" title="Watch now">${iconWrap('play')}<span class="hero-action-label">Watch now</span></a>${item ? `<a class="btn secondary hero-action-circle" href="${detailHref(item)}" data-link aria-label="More info" title="More info">${iconWrap('info')}<span class="hero-action-label">More info</span></a>` : ''}</div>
     </div>
   </section>`;
 }
@@ -669,7 +675,7 @@ function railControls(id, href) {
 function section(title, items, href, limit = 6) {
   if (!items?.length) return '';
   const id = railKey(title);
-  return `<section class="section"><div class="section-header"><div><span class="section-kicker">LUMA picks</span><h2>${escapeHtml(title)}</h2></div>${railControls(id, href)}</div><div class="rail-wrap"><div id="${id}" class="card-row">${cards(items, limit)}</div></div></section>`;
+  return `<section class="section"><div class="section-header"><div><span class="section-kicker">STREAM SUNAA picks</span><h2>${escapeHtml(title)}</h2></div>${railControls(id, href)}</div><div class="rail-wrap"><div id="${id}" class="card-row">${cards(items, limit)}</div></div></section>`;
 }
 function topTen(items) {
   if (!items?.length) return '';
@@ -765,7 +771,7 @@ function continueWatchingSection() {
     return !Number.isFinite(progress) || progress < 96;
   }).slice(0, 10);
   if (!entries.length) {
-    return `<section class="section continue-watching-section"><div class="section-header"><div><span class="section-kicker">Pick up where you left off</span><h2>Continue watching</h2></div></div><div class="continue-watching-empty"><span class="continue-empty-icon">${iconWrap('play')}</span><div><strong>Your next watch belongs here.</strong><p>Start a movie or episode and LUMA will keep your place here.</p></div><div class="continue-empty-actions"><a class="btn btn-secondary" href="/movies" data-link>Explore movies</a><a class="btn btn-secondary" href="/tv" data-link>Explore series</a></div></div></section>`;
+    return `<section class="section continue-watching-section"><div class="section-header"><div><span class="section-kicker">Pick up where you left off</span><h2>Continue watching</h2></div></div><div class="continue-watching-empty"><span class="continue-empty-icon">${iconWrap('play')}</span><div><strong>Your next watch belongs here.</strong><p>Start a movie or episode and STREAM SUNAA will keep your place here.</p></div><div class="continue-empty-actions"><a class="btn btn-secondary" href="/movies" data-link>Explore movies</a><a class="btn btn-secondary" href="/tv" data-link>Explore series</a></div></div></section>`;
   }
   const id = railKey('continue-watching');
   const cardsMarkup = entries.map(entry => {
@@ -872,7 +878,7 @@ async function renderHome() {
     state.heroPaused = false;
     state.heroHoverPaused = false;
     const lead = state.heroItems[state.heroIndex];
-    setPageMetadata({ title: 'Discover Movies & TV', description: 'Explore trending movies, popular series, top-rated picks and new releases with LUMA Stream.', image: lead?.backdrop || lead?.backdropLarge || null, path: '/', robots: 'index,follow', preloadImage: Boolean(lead?.backdrop || lead?.backdropLarge) });
+    setPageMetadata({ title: 'Discover Movies & TV', description: 'Explore trending movies, popular series, top-rated picks and new releases with STREAM SUNAA.', image: lead?.backdrop || lead?.backdropLarge || null, path: '/', robots: 'index,follow', preloadImage: Boolean(lead?.backdrop || lead?.backdropLarge) });
     app.innerHTML = `${nav('home')}<main id="main-content" tabindex="-1" class="page">${hero(lead, state.heroIndex, state.heroItems.length)}${continueWatchingSection()}${providerRow(state.home.providers)}${section('Trending today', state.home.trending.results, '/movies?sort=popularity.desc', 8)}${topTen(state.home.trending.results)}${section('Popular movies', state.home.movies.results, '/movies?sort=popularity.desc', 8)}${section('Top rated', state.home.topMovies.results, '/movies?sort=vote_average.desc', 8)}${section('Popular series', state.home.tv.results, '/tv?sort=popularity.desc', 8)}${section('Top rated series', state.home.topTv.results, '/tv?sort=vote_average.desc', 8)}${footer()}</main>`;
     bindHeroInteractions(document.querySelector('.hero'));
     startHeroCarousel(state.heroItems);
@@ -890,7 +896,7 @@ async function renderHome() {
     state.heroIndex = 0;
     state.heroPaused = false;
     state.heroHoverPaused = false;
-    setPageMetadata({ title: 'Discover Movies & TV', description: 'Explore movies, series and streaming platforms with LUMA Stream.', path: '/', robots: 'index,follow' });
+    setPageMetadata({ title: 'Discover Movies & TV', description: 'Explore movies, series and streaming platforms with STREAM SUNAA.', path: '/', robots: 'index,follow' });
     app.innerHTML = `${nav('home')}<main id="main-content" tabindex="-1" class="page">${hero(undefined, 0, 0)}${continueWatchingSection()}${providerRow(state.home.providers)}<p class="catalogue-unavailable" role="status">The live catalogue is temporarily unavailable. Your homepage sections and provider shortcuts are still available.</p>${footer()}</main>`;
     bindHeroInteractions(document.querySelector('.hero'));
     bindRails();
@@ -1104,7 +1110,7 @@ async function renderPersonDetails(id) {
     const person = data.person || {};
     const credits = usableItems(data.credits?.results, ['movie', 'tv']).slice(0, 60);
     const portrait = person.profileLarge || person.profile || '';
-    setPageMetadata({ title: `${person.name || 'Person'} - Filmography`, description: person.biography || `Explore film and television credits for ${person.name || 'this person'} on LUMA Stream.`, image: portrait || null, path: `/person/${id}`, robots: 'index,follow', preloadImage: false, type: 'profile' });
+    setPageMetadata({ title: `${person.name || 'Person'} - Filmography`, description: person.biography || `Explore film and television credits for ${person.name || 'this person'} on STREAM SUNAA.`, image: portrait || null, path: `/person/${id}`, robots: 'index,follow', preloadImage: false, type: 'profile' });
     app.innerHTML = `${nav('')}<main id="main-content" tabindex="-1" class="page-shell page person-page"><section class="person-profile"><div class="person-profile-art">${portrait ? `<img src="${portrait}" decoding="async" alt="Portrait of ${escapeHtml(person.name || 'person')}" loading="lazy">` : '<div class="poster-fallback">No portrait available</div>'}</div><div class="person-profile-copy"><span class="eyebrow">Cast & crew</span><h1 class="page-title">${escapeHtml(person.name || 'Person')}</h1><p class="person-department">${escapeHtml(person.known_for_department || 'Filmography')}</p>${person.birthday ? `<p class="person-facts">Born ${escapeHtml(person.birthday)}${person.place_of_birth ? ` · ${escapeHtml(person.place_of_birth)}` : ''}</p>` : ''}<p class="person-biography">${escapeHtml(person.biography || 'No biography is available for this person.')}</p></div></section><section class="person-filmography"><div class="section-header"><div><span class="section-kicker">Filmography</span><h2>Known credits</h2></div></div><div class="grid">${credits.length ? credits.map(card).join('') : '<div class="empty" style="grid-column:1/-1">No movie or series credits found.</div>'}</div></section>${footer()}</main>`;
   } catch (e) { if (renderSequence === state.renderSequence) renderError(e.message); }
 }
@@ -1147,7 +1153,7 @@ async function renderDetails(type, id, mount = app) {
     const creators = type === 'tv' ? dedupeBy(item.created_by || [], 'id').slice(0, 2) : dedupeBy((data.credits?.crew || []).filter(x => x.job === 'Director'), 'id').slice(0, 2);
     const genres = (item.genres || []).slice(0, 4); const synopsis = item.overview?.trim(); const providerHtml = renderProviders(data.providers);
     const logo = state.settings.imageLogos ? (item.images?.logos || []).find(x => ['en','en-US',null].includes(x.iso_639_1)) : null;
-    if (mount === app) setPageMetadata({ title: `${item.title} - ${type === 'tv' ? 'TV Series' : 'Movie'}`, description: item.overview || `Discover ${item.title} on LUMA Stream.`, image: item.backdrop || item.backdropLarge || item.posterLarge || null, path: `/details/${type}/${id}`, robots: 'index,follow', preloadImage: true, type: type === 'tv' ? 'video.tv_show' : 'video.movie' });
+    if (mount === app) setPageMetadata({ title: `${item.title} - ${type === 'tv' ? 'TV Series' : 'Movie'}`, description: item.overview || `Discover ${item.title} on STREAM SUNAA.`, image: item.backdrop || item.backdropLarge || item.posterLarge || null, path: `/details/${type}/${id}`, robots: 'index,follow', preloadImage: true, type: type === 'tv' ? 'video.tv_show' : 'video.movie' });
     const titleMarkup = logo?.file_path ? `<img class="title-logo" src="https://image.tmdb.org/t/p/w500${logo.file_path}" alt="${escapeHtml(item.title)}">` : `<h1>${escapeHtml(item.title)}</h1>`;
     let episodesMarkup = '';
     if (type === 'tv') {
@@ -1233,7 +1239,7 @@ function formatDownloadSize(bytes) {
 }
 
 // These links open the providers' own download pages. They are deliberately
-// kept separate from LUMA's direct-file download API: an HTML page is not a video file.
+// kept separate from STREAM SUNAA's direct-file download API: an HTML page is not a video file.
 function externalDownloadOptionsMarkup({ type, id, season, episode } = {}) {
   const mediaType = type === 'tv' ? 'tv' : type === 'movie' ? 'movie' : null;
   const mediaId = Number(id);
@@ -1275,11 +1281,11 @@ async function openDownloadModal({ type, id, season, episode, title, provider, o
     if (!data.available || !Array.isArray(data.qualities) || !data.qualities.length) {
       const providerStatus = data.providerConfigured
         ? (data.providerMessage || 'The configured source did not return a verifiable direct video file.')
-        : 'This player provides an embedded playback page, not a direct downloadable video file. LUMA will not save a player page or rename a stream playlist as an MP4.';
+        : 'This player provides an embedded playback page, not a direct downloadable video file. STREAM SUNAA will not save a player page or rename a stream playlist as an MP4.';
       const officialOptions = document.querySelector('.official-fallback-area');
       const officialOptionsMarkup = officialOptions ? `<div class="download-official-options">${officialOptions.outerHTML}</div>` : '';
       modal.setAttribute('aria-labelledby', 'download-title');
-      modal.innerHTML = `<button type="button" class="modal-close" data-modal-close aria-label="Close download dialog">${iconWrap('close')}</button><span class="eyebrow">Offline viewing</span><h2 id="download-title">Choose a download source</h2><p class="download-modal-intro">LUMA doesn't have a direct-file download for <strong>${escapeHtml(title || data.title || 'this title')}</strong>${type === 'tv' ? ` · Season ${Number(season) || 1}, episode ${Number(episode) || 1}` : ''}${provider ? ` from ${escapeHtml(provider)}` : ''}. You can still open the providers' own download pages below.</p><div class="download-empty-note"><span class="download-note-icon">${iconWrap('info')}</span><div><strong>Provider pages stay available.</strong><p>${escapeHtml(providerStatus)}</p></div></div>${providerDownloadOptions}<p class="download-setup-note">These options open the provider in a new tab. Available qualities and mirrors can change by title.</p>${officialOptionsMarkup}`;
+      modal.innerHTML = `<button type="button" class="modal-close" data-modal-close aria-label="Close download dialog">${iconWrap('close')}</button><span class="eyebrow">Offline viewing</span><h2 id="download-title">Choose a download source</h2><p class="download-modal-intro">STREAM SUNAA doesn't have a direct-file download for <strong>${escapeHtml(title || data.title || 'this title')}</strong>${type === 'tv' ? ` · Season ${Number(season) || 1}, episode ${Number(episode) || 1}` : ''}${provider ? ` from ${escapeHtml(provider)}` : ''}. You can still open the providers' own download pages below.</p><div class="download-empty-note"><span class="download-note-icon">${iconWrap('info')}</span><div><strong>Provider pages stay available.</strong><p>${escapeHtml(providerStatus)}</p></div></div>${providerDownloadOptions}<p class="download-setup-note">These options open the provider in a new tab. Available qualities and mirrors can change by title.</p>${officialOptionsMarkup}`;
       modal.querySelector('[data-modal-close]')?.addEventListener('click', () => closeAccessibleModal(overlay));
       requestAnimationFrame(() => modal.querySelector('[data-modal-close]')?.focus({ preventScroll: true }));
       return;
@@ -1288,9 +1294,9 @@ async function openDownloadModal({ type, id, season, episode, title, provider, o
     const qualities = data.qualities;
     const best = qualities[0];
     modal.setAttribute('aria-labelledby', 'download-title');
-    const bestSource = best.provider ? (best.sourceName || provider || 'Provider') : 'LUMA library';
-    const sourceText = best.provider ? `The highest verified direct-file quality from ${bestSource} is preselected.` : 'The highest available quality in LUMA’s local media library is preselected.';
-    modal.innerHTML = `<button type="button" class="modal-close" data-modal-close aria-label="Close download dialog">${iconWrap('close')}</button><span class="eyebrow">Offline viewing</span><h2 id="download-title">Download ${escapeHtml(title || data.title || 'video')}</h2><p class="download-modal-intro">${escapeHtml(sourceText)}</p><label class="download-quality-label" for="download-quality">Video quality</label><select id="download-quality" class="download-quality-select">${qualities.map((quality, index) => `<option value="${index}" ${index === 0 ? 'selected' : ''}>${escapeHtml(quality.label)}${quality.height ? ` · ${quality.height}p` : ''}${quality.sourceName ? ` · ${escapeHtml(quality.sourceName)}` : ''} · ${escapeHtml(formatDownloadSize(quality.sizeBytes))}</option>`).join('')}</select><div class="download-file-summary" id="download-file-summary"><span class="download-summary-icon">${iconWrap('film')}</span><span><strong>${escapeHtml(best.filename)}</strong><small>${escapeHtml(best.label)} · ${escapeHtml(best.sourceName || bestSource)} · ${escapeHtml(formatDownloadSize(best.sizeBytes))}</small></span><span class="download-best-mark">Best available</span></div><a class="btn primary download-start" id="download-start" href="${escapeHtml(best.downloadUrl)}">${iconWrap('download')} Download ${escapeHtml(best.label)}</a><p class="download-footnote">The original video file is streamed to your browser without being buffered in full on the LUMA server. Provider links expire and are refreshed when you reopen this dialog.</p>${providerDownloadOptions}`;
+    const bestSource = best.provider ? (best.sourceName || provider || 'Provider') : 'STREAM SUNAA library';
+    const sourceText = best.provider ? `The highest verified direct-file quality from ${bestSource} is preselected.` : 'The highest available quality in STREAM SUNAA’s local media library is preselected.';
+    modal.innerHTML = `<button type="button" class="modal-close" data-modal-close aria-label="Close download dialog">${iconWrap('close')}</button><span class="eyebrow">Offline viewing</span><h2 id="download-title">Download ${escapeHtml(title || data.title || 'video')}</h2><p class="download-modal-intro">${escapeHtml(sourceText)}</p><label class="download-quality-label" for="download-quality">Video quality</label><select id="download-quality" class="download-quality-select">${qualities.map((quality, index) => `<option value="${index}" ${index === 0 ? 'selected' : ''}>${escapeHtml(quality.label)}${quality.height ? ` · ${quality.height}p` : ''}${quality.sourceName ? ` · ${escapeHtml(quality.sourceName)}` : ''} · ${escapeHtml(formatDownloadSize(quality.sizeBytes))}</option>`).join('')}</select><div class="download-file-summary" id="download-file-summary"><span class="download-summary-icon">${iconWrap('film')}</span><span><strong>${escapeHtml(best.filename)}</strong><small>${escapeHtml(best.label)} · ${escapeHtml(best.sourceName || bestSource)} · ${escapeHtml(formatDownloadSize(best.sizeBytes))}</small></span><span class="download-best-mark">Best available</span></div><a class="btn primary download-start" id="download-start" href="${escapeHtml(best.downloadUrl)}">${iconWrap('download')} Download ${escapeHtml(best.label)}</a><p class="download-footnote">The original video file is streamed to your browser without being buffered in full on the STREAM SUNAA server. Provider links expire and are refreshed when you reopen this dialog.</p>${providerDownloadOptions}`;
     const qualitySelect = modal.querySelector('#download-quality');
     const summary = modal.querySelector('#download-file-summary');
     const downloadLink = modal.querySelector('#download-start');
@@ -1298,7 +1304,7 @@ async function openDownloadModal({ type, id, season, episode, title, provider, o
       const selected = qualities[Number(qualitySelect.value)] || best;
       downloadLink.href = selected.downloadUrl;
       downloadLink.innerHTML = `${iconWrap('download')} Download ${escapeHtml(selected.label)}`;
-      summary.innerHTML = `<span class="download-summary-icon">${iconWrap('film')}</span><span><strong>${escapeHtml(selected.filename)}</strong><small>${escapeHtml(selected.label)} · ${escapeHtml(selected.sourceName || (selected.provider ? provider || 'Provider' : 'LUMA library'))} · ${escapeHtml(formatDownloadSize(selected.sizeBytes))}</small></span>${selected.id === best.id ? '<span class="download-best-mark">Best available</span>' : '<span class="download-alternate-mark">Selected quality</span>'}`;
+      summary.innerHTML = `<span class="download-summary-icon">${iconWrap('film')}</span><span><strong>${escapeHtml(selected.filename)}</strong><small>${escapeHtml(selected.label)} · ${escapeHtml(selected.sourceName || (selected.provider ? provider || 'Provider' : 'STREAM SUNAA library'))} · ${escapeHtml(formatDownloadSize(selected.sizeBytes))}</small></span>${selected.id === best.id ? '<span class="download-best-mark">Best available</span>' : '<span class="download-alternate-mark">Selected quality</span>'}`;
     };
     qualitySelect.addEventListener('change', updateDownload);
     downloadLink.addEventListener('click', () => window.setTimeout(() => closeAccessibleModal(overlay), 250));
@@ -1308,7 +1314,7 @@ async function openDownloadModal({ type, id, season, episode, title, provider, o
     if (!overlay.isConnected) return;
     const modal = overlay.querySelector('.download-modal');
     const providerDownloadOptions = externalDownloadOptionsMarkup({ type, id, season, episode });
-    modal.innerHTML = `<button type="button" class="modal-close" data-modal-close aria-label="Close download dialog">${iconWrap('close')}</button><span class="eyebrow">Offline viewing</span><h2>Couldn't check LUMA downloads</h2><p class="download-modal-intro">${escapeHtml(error.message || 'The download catalogue could not be checked.')}</p>${providerDownloadOptions}<p class="download-setup-note">LUMA's download check failed, but the provider pages can still be opened separately.</p>`;
+    modal.innerHTML = `<button type="button" class="modal-close" data-modal-close aria-label="Close download dialog">${iconWrap('close')}</button><span class="eyebrow">Offline viewing</span><h2>Couldn't check STREAM SUNAA downloads</h2><p class="download-modal-intro">${escapeHtml(error.message || 'The download catalogue could not be checked.')}</p>${providerDownloadOptions}<p class="download-setup-note">STREAM SUNAA's download check failed, but the provider pages can still be opened separately.</p>`;
     modal.querySelector('[data-modal-close]')?.addEventListener('click', () => closeAccessibleModal(overlay));
     requestAnimationFrame(() => modal.querySelector('[data-modal-close]')?.focus({ preventScroll: true }));
   }
@@ -1343,7 +1349,7 @@ async function renderWatch(type, id) {
     if (renderSequence !== state.renderSequence) return;
     const item = data.details;
     const params = new URLSearchParams(location.search);
-    setPageMetadata({ title: `Watch ${item.title}`, description: `Viewing options and episode navigation for ${item.title} on LUMA Stream.`, image: item.backdrop || item.backdropLarge || item.posterLarge || null, path: `/details/${type}/${id}`, robots: 'noindex,follow', preloadImage: false, type: type === 'tv' ? 'video.tv_show' : 'video.movie' });
+    setPageMetadata({ title: `Watch ${item.title}`, description: `Viewing options and episode navigation for ${item.title} on STREAM SUNAA.`, image: item.backdrop || item.backdropLarge || item.posterLarge || null, path: `/details/${type}/${id}`, robots: 'noindex,follow', preloadImage: false, type: type === 'tv' ? 'video.tv_show' : 'video.movie' });
     let season = Math.max(1, Number(params.get('season') || 1));
     let episode = Math.max(1, Number(params.get('episode') || 1));
     const isSeries = type === 'tv';
@@ -1378,7 +1384,7 @@ async function renderWatch(type, id) {
           <section class="info-panel streaming-source-panel" aria-label="Streaming source selector">
             <div class="panel-head source-panel-head"><div><span class="panel-kicker">Streaming source</span><h3><span id="active-source-label">${escapeHtml(initialSource.name)}</span></h3></div><span class="source-panel-status">Select a source if playback fails</span></div>
             <div class="source-pills" id="source-pills">${sourcePillsMarkup(initialSources, activeSourceName, sourceListExpanded)}</div>
-            <p class="player-note">LUMA cannot inspect errors inside third-party players. Try another source below if the selected player does not load.</p>
+            <p class="player-note">STREAM SUNAA cannot inspect errors inside third-party players. Try another source below if the selected player does not load.</p>
             ${officialFallbackMarkup(item, type, data.providers)}
           </section>
         </section>
@@ -1694,13 +1700,13 @@ function renderSettings() {
       ${settingToggleRow('spoilerFree','Spoiler-Free Episodes','Hide episode titles and metadata in episode lists.',s.spoilerFree)}
       ${settingToggleRow('reduceMotion','Reduce Motion','Dial back the spring and transition effects.',s.reduceMotion)}
     `, active)}
-    ${settingsSection('playback','sliders','Playback','Configure the parts of playback LUMA can control locally.', `
+    ${settingsSection('playback','sliders','Playback','Configure the parts of playback STREAM SUNAA can control locally.', `
       ${settingToggleRow('autoplay','Autoplay on Supported Player','Pass the autoplay preference to VidKing. Other sources may ignore this setting.',s.autoplay)}
     `, active)}
     ${settingsSection('region','globe','Streaming Region','Choose the region used for provider availability and region-dependent catalogue requests.', `${settingChoice('region','Streaming Region','Provider availability differs by country.',[{value:'NP',label:'Nepal'},{value:'US',label:'United States'},{value:'GB',label:'United Kingdom'},{value:'IN',label:'India'},{value:'AU',label:'Australia'},{value:'CA',label:'Canada'}],s.region)}<p class="settings-note">Changing region refreshes the current page. Availability is supplied by TMDB and may not reflect every service plan.</p>`, active)}
-    ${settingsSection('servers','server','Server Order','Choose the order in which source options are shown. LUMA cannot reliably detect failures inside third-party players.', `<div class="server-list" id="server-list" role="list" aria-label="Preferred player source order">${s.serverOrder.map((name,i)=>`<div class="server-item" role="listitem" aria-posinset="${i+1}" aria-setsize="${s.serverOrder.length}" draggable="true" data-server="${escapeHtml(name)}" tabindex="0"><span class="grip" aria-hidden="true">${iconWrap('grip')}</span><span class="server-index" aria-label="Position ${i+1}">${i+1}</span><strong>${escapeHtml(name)}</strong><span class="server-status">Unverified</span><span class="server-move-actions"><button type="button" class="server-move" data-server-move="up" aria-label="Move ${escapeHtml(name)} up" ${i===0?'disabled':''}>↑</button><button type="button" class="server-move" data-server-move="down" aria-label="Move ${escapeHtml(name)} down" ${i===s.serverOrder.length-1?'disabled':''}>↓</button></span></div>`).join('')}</div><p class="settings-note">This changes source display order only; it does not confirm availability or automatically detect playback failures.</p>`, active)}
+    ${settingsSection('servers','server','Server Order','Choose the order in which source options are shown. STREAM SUNAA cannot reliably detect failures inside third-party players.', `<div class="server-list" id="server-list" role="list" aria-label="Preferred player source order">${s.serverOrder.map((name,i)=>`<div class="server-item" role="listitem" aria-posinset="${i+1}" aria-setsize="${s.serverOrder.length}" draggable="true" data-server="${escapeHtml(name)}" tabindex="0"><span class="grip" aria-hidden="true">${iconWrap('grip')}</span><span class="server-index" aria-label="Position ${i+1}">${i+1}</span><strong>${escapeHtml(name)}</strong><span class="server-status">Unverified</span><span class="server-move-actions"><button type="button" class="server-move" data-server-move="up" aria-label="Move ${escapeHtml(name)} up" ${i===0?'disabled':''}>↑</button><button type="button" class="server-move" data-server-move="down" aria-label="Move ${escapeHtml(name)} down" ${i===s.serverOrder.length-1?'disabled':''}>↓</button></span></div>`).join('')}</div><p class="settings-note">This changes source display order only; it does not confirm availability or automatically detect playback failures.</p>`, active)}
   `;
-  app.innerHTML = `${nav('settings')}<main id="main-content" tabindex="-1" class="page settings-page"><div class="settings-shell"><aside class="settings-sidebar"><div class="settings-title"><span class="eyebrow">LUMA</span><h1>Settings</h1><p>Keep the useful controls and nothing extra.</p></div><nav class="settings-tabs">${tabs.map(([id,label,ic])=>`<a class="settings-tab ${id===active?'active':''}" href="/settings?section=${id}" data-link>${iconWrap(ic)}<span>${label}</span></a>`).join('')}</nav></aside><div class="settings-content">${body}</div></div>${footer()}</main>`;
+  app.innerHTML = `${nav('settings')}<main id="main-content" tabindex="-1" class="page settings-page"><div class="settings-shell"><aside class="settings-sidebar"><div class="settings-title"><span class="eyebrow">STREAM SUNAA</span><h1>Settings</h1><p>Keep the useful controls and nothing extra.</p></div><nav class="settings-tabs">${tabs.map(([id,label,ic])=>`<a class="settings-tab ${id===active?'active':''}" href="/settings?section=${id}" data-link>${iconWrap(ic)}<span>${label}</span></a>`).join('')}</nav></aside><div class="settings-content">${body}</div></div>${footer()}</main>`;
   bindSettings();
 }
 function dropdownTriggerSelector() { return '[data-setting-select],[data-filter-select],[data-season-select]'; }
@@ -1849,18 +1855,19 @@ function bindServerDrag() {
   refreshServerNumbers();
 }
 function renderAbout() {
-  app.innerHTML = `${nav()}<main id="main-content" tabindex="-1" class="page-shell page"><div class="page-top"><div><span class="eyebrow">Inside LUMA</span><h1 class="page-title">About</h1><p class="page-intro">A focused catalogue experience for discovery, local lists and a provider-agnostic watch layer.</p></div></div><div class="about-grid"><div class="info-panel"><div class="panel-head"><div><span class="panel-kicker">Interface</span><h3>Cinematic by default</h3></div>${iconWrap('layers')}</div><p>Large artwork, compact metadata, fast catalogue browsing and a simple player flow keep the interface focused on finding something worth watching.</p></div><div class="info-panel"><div class="panel-head"><div><span class="panel-kicker">Data</span><h3>TMDB powered</h3></div>${iconWrap('globe')}</div><p>This product uses the TMDB API for metadata and imagery but is not endorsed or certified by TMDB.</p></div></div>${footer()}</main>`;
+  app.innerHTML = `${nav()}<main id="main-content" tabindex="-1" class="page-shell page"><div class="page-top"><div><span class="eyebrow">Inside STREAM SUNAA</span><h1 class="page-title">About</h1><p class="page-intro">A focused catalogue experience for discovery, local lists and a provider-agnostic watch layer.</p></div></div><div class="about-grid"><div class="info-panel"><div class="panel-head"><div><span class="panel-kicker">Interface</span><h3>Cinematic by default</h3></div>${iconWrap('layers')}</div><p>Large artwork, compact metadata, fast catalogue browsing and a simple player flow keep the interface focused on finding something worth watching.</p></div><div class="info-panel"><div class="panel-head"><div><span class="panel-kicker">Data</span><h3>TMDB powered</h3></div>${iconWrap('globe')}</div><p>This product uses the TMDB API for metadata and imagery but is not endorsed or certified by TMDB.</p></div></div>${footer()}</main>`;
 }
 function renderError(message) { app.innerHTML = `${nav()}<main id="main-content" tabindex="-1" class="page-shell page"><div class="empty"><div>${iconWrap('info')}</div><div>${escapeHtml(message)}</div><a class="btn secondary" href="/" data-link>Return home</a></div>${footer()}</main>`; }
 function navigate(url) {
   history.pushState({}, '', url);
   const render = () => router();
-  if (document.startViewTransition && !shouldReduceMotion()) {
+  const touchDevice = window.matchMedia?.('(hover: none), (pointer: coarse)')?.matches ?? false;
+  if (document.startViewTransition && !shouldReduceMotion() && !touchDevice) {
     document.startViewTransition(render);
   } else {
     render();
   }
-  requestAnimationFrame(() => window.scrollTo({ top:0, behavior: state.settings.reduceMotion ? 'auto' : 'smooth' }));
+  requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: state.settings.reduceMotion || touchDevice ? 'auto' : 'smooth' }));
 }
 function routeParts() { return location.pathname.replace(/\/+$/, '').split('/').filter(Boolean); }
 async function router() {
@@ -1876,16 +1883,16 @@ async function router() {
   }
   const route = `/${parts.join('/')}`;
   const staticMeta = {
-    '/': { title: 'Discover Movies & TV', description: 'Explore trending movies, popular series, top-rated picks and new releases with LUMA Stream.', robots: 'index,follow' },
-    '/browse': { title: 'Browse Movies & Series', description: 'Explore movies, TV series, top-rated titles and streaming provider discovery on LUMA Stream.' },
-    '/movies': { title: 'Movies', description: 'Browse movies by popularity, release year, rating, genre and provider on LUMA Stream.' },
-    '/tv': { title: 'TV Series', description: 'Discover TV series by popularity, first-air year, rating, genre and provider on LUMA Stream.' },
-    '/my-list': { title: 'My List', description: 'Your locally saved movies and series in LUMA Stream.', robots: 'noindex,nofollow' },
-    '/history': { title: 'History', description: 'Recently opened titles in your LUMA Stream browsing history.', robots: 'noindex,nofollow' },
-    '/settings': { title: 'Settings', description: 'Customize your LUMA Stream viewing, appearance and region preferences.', robots: 'noindex,nofollow' },
-    '/about': { title: 'About LUMA Stream', description: 'Learn about LUMA Stream and its TMDB-powered discovery catalogue.' },
+    '/': { title: 'Discover Movies & TV', description: 'Explore trending movies, popular series, top-rated picks and new releases with STREAM SUNAA.', robots: 'index,follow' },
+    '/browse': { title: 'Browse Movies & Series', description: 'Explore movies, TV series, top-rated titles and streaming provider discovery on STREAM SUNAA.' },
+    '/movies': { title: 'Movies', description: 'Browse movies by popularity, release year, rating, genre and provider on STREAM SUNAA.' },
+    '/tv': { title: 'TV Series', description: 'Discover TV series by popularity, first-air year, rating, genre and provider on STREAM SUNAA.' },
+    '/my-list': { title: 'My List', description: 'Your locally saved movies and series in STREAM SUNAA.', robots: 'noindex,nofollow' },
+    '/history': { title: 'History', description: 'Recently opened titles in your STREAM SUNAA browsing history.', robots: 'noindex,nofollow' },
+    '/settings': { title: 'Settings', description: 'Customize your STREAM SUNAA viewing, appearance and region preferences.', robots: 'noindex,nofollow' },
+    '/about': { title: 'About STREAM SUNAA', description: 'Learn about STREAM SUNAA and its TMDB-powered discovery catalogue.' },
   };
-  const safeMeta = staticMeta[route] || (parts[0] === 'person' ? { title: 'Cast & Crew Profile', description: 'Explore filmographies and screen credits on LUMA Stream.' } : parts[0] === 'details' ? { title: 'Title Details', description: 'Explore movie and television details on LUMA Stream.' } : parts[0] === 'watch' ? { title: 'Watch', description: 'Viewing options and episode navigation on LUMA Stream.', robots: 'noindex,follow' } : { title: 'Page Not Found', description: 'The requested LUMA Stream page could not be found.', robots: 'noindex,follow' });
+  const safeMeta = staticMeta[route] || (parts[0] === 'person' ? { title: 'Cast & Crew Profile', description: 'Explore filmographies and screen credits on STREAM SUNAA.' } : parts[0] === 'details' ? { title: 'Title Details', description: 'Explore movie and television details on STREAM SUNAA.' } : parts[0] === 'watch' ? { title: 'Watch', description: 'Viewing options and episode navigation on STREAM SUNAA.', robots: 'noindex,follow' } : { title: 'Page Not Found', description: 'The requested STREAM SUNAA page could not be found.', robots: 'noindex,follow' });
   const isWatch = parts[0] === 'watch' && parts.length >= 3;
   const canonical = isWatch ? `/details/${parts[1]}/${parts[2]}` : (staticMeta[route] ? route : location.pathname);
   setPageMetadata({ ...safeMeta, path: canonical, image: null, preloadImage: false });

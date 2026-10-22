@@ -419,7 +419,7 @@ app.get('/api/downloads/:media/:id', async (req, res) => {
   const localQualities = localListing.qualities.map((quality) => ({
     ...quality,
     provider: false,
-    sourceName: 'LUMA library',
+    sourceName: 'STREAM SUNAA library',
   }));
 
   const providerListing = await providerDownloadAdapter.list({
@@ -556,22 +556,22 @@ function seoText(value, maxLength = 155) {
   return `${(boundary > maxLength * 0.6 ? clipped.slice(0, boundary) : clipped).trim()}…`;
 }
 function seoTitle(name, suffix = '') {
-  const brand = ' | LUMA Stream';
+  const brand = ' | STREAM SUNAA';
   const tail = `${suffix}${brand}`;
   return `${seoText(name, Math.max(12, 63 - tail.length))}${tail}`;
 }
 function makeSeoFallback(title, description, details = {}) {
   const image = details.image ? `<img class="seo-fallback-image" src="${htmlEscape(details.image)}" alt="${htmlEscape(details.imageAlt || `${title} artwork`)}" width="185" height="278" loading="eager" />` : '';
   const meta = details.meta ? `<p class="seo-fallback-meta">${htmlEscape(details.meta)}</p>` : '';
-  const link = details.href ? `<p><a class="seo-fallback-link" href="${htmlEscape(details.href)}">${htmlEscape(details.linkLabel || 'Explore on LUMA Stream')}</a></p>` : '';
-  return `<main class="seo-fallback"><article>${image}<div class="seo-fallback-copy"><p class="seo-fallback-eyebrow">LUMA Stream · Catalogue</p><h1>${htmlEscape(title)}</h1>${meta}<p>${htmlEscape(seoText(description, 900))}</p>${link}<p class="seo-fallback-footnote">LUMA provides catalogue information and viewing discovery. Playback and download availability depend on the source.</p></div></article></main>`;
+  const link = details.href ? `<p><a class="seo-fallback-link" href="${htmlEscape(details.href)}">${htmlEscape(details.linkLabel || 'Explore on STREAM SUNAA')}</a></p>` : '';
+  return `<main class="seo-fallback"><article>${image}<div class="seo-fallback-copy"><p class="seo-fallback-eyebrow">STREAM SUNAA · Catalogue</p><h1>${htmlEscape(title)}</h1>${meta}<p>${htmlEscape(seoText(description, 900))}</p>${link}<p class="seo-fallback-footnote">STREAM SUNAA provides catalogue information and viewing discovery. Playback and download availability depend on the source.</p></div></article></main>`;
 }
 function structuredDataForPage(metadata, canonical, image, title, description, origin) {
   if (metadata.structuredData && typeof metadata.structuredData === 'object') return metadata.structuredData;
   if (canonical === new URL('/', origin).href) {
-    return { '@context': 'https://schema.org', '@type': 'WebSite', name: 'LUMA Stream', url: new URL('/', origin).href, description };
+    return { '@context': 'https://schema.org', '@type': 'WebSite', name: 'STREAM SUNAA', url: new URL('/', origin).href, description };
   }
-  return { '@context': 'https://schema.org', '@type': 'WebPage', name: title, description, url: canonical, isPartOf: { '@type': 'WebSite', name: 'LUMA Stream', url: new URL('/', origin).href }, primaryImageOfPage: image };
+  return { '@context': 'https://schema.org', '@type': 'WebPage', name: title, description, url: canonical, isPartOf: { '@type': 'WebSite', name: 'STREAM SUNAA', url: new URL('/', origin).href }, primaryImageOfPage: image };
 }
 function serializeStructuredData(value) {
   return JSON.stringify(value).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
@@ -603,13 +603,13 @@ function injectPageMetadata(req, metadata) {
   const canonicalPath = metadata.canonicalPath || req.path || '/';
   const canonical = new URL(canonicalPath, origin).href;
   const image = /^https?:\/\//i.test(metadata.image || '') ? metadata.image : new URL(metadata.image || FALLBACK_SOCIAL_IMAGE, origin).href;
-  const title = seoText(metadata.title || 'LUMA Stream - Discover Movies & TV', 65);
-  const description = seoText(metadata.description || 'Discover movies, television series and people with LUMA Stream’s cinematic catalogue.', 160);
+  const title = seoText(metadata.title || 'STREAM SUNAA - Discover Movies & TV', 65);
+  const description = seoText(metadata.description || 'Discover movies, television series and people with STREAM SUNAA’s cinematic catalogue.', 160);
   let html = INDEX_HTML.replace(/<title>[\s\S]*?<\/title>/i, `<title>${htmlEscape(title)}</title>`);
   for (const [id, value] of Object.entries({
     'meta-description': description,
     'meta-robots': `${metadata.robots || 'index,follow'}${String(metadata.robots || 'index,follow').includes('max-image-preview:large') ? '' : ',max-image-preview:large'}`,
-    'meta-og-site-name': 'LUMA Stream',
+    'meta-og-site-name': 'STREAM SUNAA',
     'meta-og-type': metadata.type || 'website',
     'meta-og-title': title,
     'meta-og-description': description,
@@ -633,17 +633,17 @@ function injectPageMetadata(req, metadata) {
 }
 function defaultPageMetadata(pathname) {
   const entries = {
-    '/': ['LUMA Stream - Discover Movies & TV', 'Discover movies, television series and people with LUMA Stream’s cinematic catalogue.', '/', 'index,follow'],
-    '/browse': ['Browse Movies & Series | LUMA Stream', 'Explore movies, TV series, top-rated titles and region-specific streaming provider discovery on LUMA Stream.', '/browse', 'index,follow'],
-    '/movies': ['Movies | LUMA Stream', 'Browse movies by popularity, release year, rating, genre and provider on LUMA Stream.', '/movies', 'index,follow'],
-    '/tv': ['TV Series | LUMA Stream', 'Discover TV series by popularity, first-air year, rating, genre and provider on LUMA Stream.', '/tv', 'index,follow'],
-    '/search': ['Search Movies, Series & People | LUMA Stream', 'Search for movies, TV series, actors and film creators with LUMA Stream.', '/search', 'noindex,follow'],
-    '/my-list': ['My List | LUMA Stream', 'Your locally saved movies and series in LUMA Stream.', '/my-list', 'noindex,nofollow'],
-    '/history': ['History | LUMA Stream', 'Recently opened titles in your LUMA Stream browsing history.', '/history', 'noindex,nofollow'],
-    '/settings': ['Settings | LUMA Stream', 'Customize your LUMA Stream viewing, appearance and region preferences.', '/settings', 'noindex,nofollow'],
-    '/about': ['About | LUMA Stream', 'Learn about LUMA Stream, its discovery interface and TMDB-powered catalogue data.', '/about', 'index,follow'],
+    '/': ['STREAM SUNAA - Discover Movies & TV', 'Discover movies, television series and people with STREAM SUNAA’s cinematic catalogue.', '/', 'index,follow'],
+    '/browse': ['Browse Movies & Series | STREAM SUNAA', 'Explore movies, TV series, top-rated titles and region-specific streaming provider discovery on STREAM SUNAA.', '/browse', 'index,follow'],
+    '/movies': ['Movies | STREAM SUNAA', 'Browse movies by popularity, release year, rating, genre and provider on STREAM SUNAA.', '/movies', 'index,follow'],
+    '/tv': ['TV Series | STREAM SUNAA', 'Discover TV series by popularity, first-air year, rating, genre and provider on STREAM SUNAA.', '/tv', 'index,follow'],
+    '/search': ['Search Movies, Series & People | STREAM SUNAA', 'Search for movies, TV series, actors and film creators with STREAM SUNAA.', '/search', 'noindex,follow'],
+    '/my-list': ['My List | STREAM SUNAA', 'Your locally saved movies and series in STREAM SUNAA.', '/my-list', 'noindex,nofollow'],
+    '/history': ['History | STREAM SUNAA', 'Recently opened titles in your STREAM SUNAA browsing history.', '/history', 'noindex,nofollow'],
+    '/settings': ['Settings | STREAM SUNAA', 'Customize your STREAM SUNAA viewing, appearance and region preferences.', '/settings', 'noindex,nofollow'],
+    '/about': ['About | STREAM SUNAA', 'Learn about STREAM SUNAA, its discovery interface and TMDB-powered catalogue data.', '/about', 'index,follow'],
   };
-  const value = entries[pathname] || ['Page Not Found | LUMA Stream', 'The requested LUMA Stream page could not be found.', pathname || '/', 'noindex,follow'];
+  const value = entries[pathname] || ['Page Not Found | STREAM SUNAA', 'The requested STREAM SUNAA page could not be found.', pathname || '/', 'noindex,follow'];
   const safeTitle = seoText(value[0], 65);
   const safeDescription = seoText(value[1], 160);
   return {
@@ -652,7 +652,7 @@ function defaultPageMetadata(pathname) {
     canonicalPath: value[2],
     robots: value[3],
     image: FALLBACK_SOCIAL_IMAGE,
-    ssrHtml: makeSeoFallback(safeTitle, safeDescription, { href: pathname === '/' ? '/browse' : '/', linkLabel: pathname === '/' ? 'Browse the catalogue' : 'Return to LUMA Stream' }),
+    ssrHtml: makeSeoFallback(safeTitle, safeDescription, { href: pathname === '/' ? '/browse' : '/', linkLabel: pathname === '/' ? 'Browse the catalogue' : 'Return to STREAM SUNAA' }),
   };
 }
 
@@ -727,8 +727,8 @@ app.use(async (req, res) => {
   if (titleMatch) {
     const [, media, id] = titleMatch;
     metadata.canonicalPath = `/details/${media}/${id}`;
-    metadata.title = `${media === 'tv' ? 'TV Series' : 'Movie'} Details | LUMA Stream`;
-    metadata.description = `Explore ${media === 'tv' ? 'television series' : 'movie'} details, ratings and related titles on LUMA Stream.`;
+    metadata.title = `${media === 'tv' ? 'TV Series' : 'Movie'} Details | STREAM SUNAA`;
+    metadata.description = `Explore ${media === 'tv' ? 'television series' : 'movie'} details, ratings and related titles on STREAM SUNAA.`;
     metadata.image = FALLBACK_SOCIAL_IMAGE;
     metadata.robots = routePath.startsWith('/watch/') ? 'noindex,follow' : 'index,follow';
     metadata.ssrHtml = makeSeoFallback(metadata.title, metadata.description, {
@@ -741,7 +741,7 @@ app.use(async (req, res) => {
       const isSeries = media === 'tv';
       const itemUrl = new URL(metadata.canonicalPath, publicOrigin(req)).href;
       const itemImage = item.poster_path ? imageUrl(item.poster_path, 'w780') : item.backdrop_path ? imageUrl(item.backdrop_path, 'w1280') : FALLBACK_SOCIAL_IMAGE;
-      const description = seoText(item.overview || `Explore details, ratings and related ${isSeries ? 'series' : 'movies'} for ${title} on LUMA Stream.`, 160);
+      const description = seoText(item.overview || `Explore details, ratings and related ${isSeries ? 'series' : 'movies'} for ${title} on STREAM SUNAA.`, 160);
       metadata.title = seoTitle(title, isSeries ? ' (TV Series)' : ' (Movie)');
       metadata.description = description;
       metadata.image = item.backdrop_path ? imageUrl(item.backdrop_path, 'w1280') : itemImage;
@@ -776,8 +776,8 @@ app.use(async (req, res) => {
   } else if (personMatch) {
     const id = personMatch[1];
     metadata.canonicalPath = `/person/${id}`;
-    metadata.title = 'Cast & Crew Profile | LUMA Stream';
-    metadata.description = 'Explore filmographies and screen credits on LUMA Stream.';
+    metadata.title = 'Cast & Crew Profile | STREAM SUNAA';
+    metadata.description = 'Explore filmographies and screen credits on STREAM SUNAA.';
     metadata.image = FALLBACK_SOCIAL_IMAGE;
     metadata.robots = 'index,follow';
     metadata.ssrHtml = makeSeoFallback(metadata.title, metadata.description, {
@@ -788,7 +788,7 @@ app.use(async (req, res) => {
       const person = await tmdb(`/person/${id}`, { language: 'en-US' });
       const name = String(person.name || 'Cast and crew profile').trim();
       const portrait = person.profile_path ? imageUrl(person.profile_path, 'w500') : FALLBACK_SOCIAL_IMAGE;
-      const biography = seoText(person.biography || `Explore films and television credits for ${name} on LUMA Stream.`, 160);
+      const biography = seoText(person.biography || `Explore films and television credits for ${name} on STREAM SUNAA.`, 160);
       metadata.title = seoTitle(name, ' (Filmography)');
       metadata.description = biography;
       metadata.image = portrait;
@@ -806,7 +806,7 @@ app.use(async (req, res) => {
   if (!isKnownRoute) {
     res.status(404);
     metadata.robots = 'noindex,nofollow';
-    metadata.ssrHtml = makeSeoFallback('Page not found', 'The requested LUMA Stream page does not exist.', { href: '/', linkLabel: 'Return home' });
+    metadata.ssrHtml = makeSeoFallback('Page not found', 'The requested STREAM SUNAA page does not exist.', { href: '/', linkLabel: 'Return home' });
   }
   res.type('html').send(injectPageMetadata(req, metadata));
 });
@@ -825,7 +825,7 @@ export { app, cache, requestRegion };
 const isMainModule = Boolean(process.argv[1]) && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMainModule) {
   const server = app.listen(PORT, () => {
-    console.log(`LUMA Stream running at http://localhost:${PORT}`);
+    console.log(`STREAM SUNAA running at http://localhost:${PORT}`);
     console.log(`TMDB token loaded: ${Boolean(TMDB_TOKEN)}`);
     console.log(`TMDB response cache: ${cache.maxEntries} entries / ${Math.round(CACHE_MS / 1000)}s TTL`);
   });

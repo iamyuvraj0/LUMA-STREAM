@@ -2113,7 +2113,7 @@ body::after { animation: none !important; filter: none !important; will-change: 
 .source-more-pill:hover { background: var(--surface-strong); border-style: solid; transform: translateY(-1px); }
 .source-more-pill:focus-visible { outline: 2px solid rgba(130,150,255,.75); outline-offset: 3px; }
 
-/* External download-provider options intentionally coexist with LUMA direct-file downloads. */
+/* External download-provider options intentionally coexist with STREAM SUNAA direct-file downloads. */
 .download-provider-options { display: grid; gap: 10px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
 .download-provider-heading { display: grid; gap: 4px; }
 .download-provider-heading strong { color: var(--text); font-size: 12px; font-weight: 800; }
@@ -2481,3 +2481,198 @@ body::after { animation: none !important; filter: none !important; will-change: 
 .provider-catalog-tab.active { border-color: color-mix(in srgb, var(--accent-primary, #91a58b) 55%, transparent); background: color-mix(in srgb, var(--accent-primary, #91a58b) 14%, transparent); }
 .provider-catalog-clear { border-color: transparent; color: var(--muted); }
 @media (max-width: 650px) { .provider-catalog-switch { gap: 6px; } .provider-catalog-label { flex: 1 0 100%; } }
+
+
+/* Icon-led project contact links, consistent with the footer typography. */
+.footer-contact-links { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 14px; }
+.footer-contact-links a { display: inline-flex; align-items: center; gap: 9px; min-height: 34px; max-width: 100%; padding: 5px 8px; border-radius: 9px; color: var(--muted); font-size: 10px; font-weight: 700; overflow-wrap: anywhere; transition: color .16s ease, background-color .16s ease; }
+.footer-contact-links a:hover, .footer-contact-links a:focus-visible { color: var(--text); background: var(--accent-soft); }
+.footer-contact-links .icon { width: 16px; height: 16px; flex: 0 0 auto; }
+
+/* STREAM SUNAA mobile repair pass: reliable document scrolling, fast taps and compact controls. */
+html {
+  height: auto !important;
+  min-height: 100%;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  scroll-behavior: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+body {
+  height: auto !important;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  overscroll-behavior-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+#app { min-height: 100vh; min-height: 100dvh; overflow: visible !important; }
+
+/* Touch input should activate immediately; keep keyboard focus states visible. */
+@media (hover: none), (pointer: coarse) {
+  a, button, input, select, textarea, [role="button"] { touch-action: manipulation; }
+  .page { animation: none !important; transform: none !important; }
+  .site-header, .bottom-liquid-nav { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+  .bottom-liquid-nav { transition: none !important; }
+  .bottom-nav-link, .header-icon, .hero-action-circle, .footer-contact-links a { transition: none !important; }
+  .movie-card, .provider-tile, .browse-tile, .info-panel, .trailer-card, .poster-wrap img,
+  .hero-bg, .details-bg, .loading-orb, .skeleton { animation: none !important; will-change: auto !important; }
+}
+
+@media (max-width: 700px) {
+  body { padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important; }
+
+  /* The compact header has only two children; don't reserve a phantom desktop-nav column. */
+  .site-header { padding: 8px 12px 0 !important; }
+  .header-inner {
+    width: 100% !important;
+    min-height: 46px !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 8px !important;
+    padding: 0 !important;
+  }
+  .brand { gap: 7px !important; min-width: 0; }
+  .brand-mark { width: 28px !important; height: 28px !important; border-radius: 9px !important; flex: 0 0 28px; }
+  .brand-word { display: inline !important; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: clamp(10px, 3.2vw, 13px) !important; letter-spacing: -.045em !important; }
+  .header-actions { justify-content: flex-end !important; gap: 3px !important; }
+  .header-icon { width: 38px !important; height: 40px !important; border-radius: 12px !important; }
+
+  /* Keep the floating nav crisp and make all five links easy, independent tap targets. */
+  .bottom-liquid-nav {
+    z-index: 1000 !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: max(7px, env(safe-area-inset-bottom, 0px)) !important;
+    width: calc(100vw - 16px) !important;
+    min-height: 59px !important;
+    padding: 5px !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 2px !important;
+    overflow: hidden !important;
+    transform: translate3d(-50%, 0, 0) !important;
+    border-radius: 999px !important;
+    background: color-mix(in srgb, var(--surface-solid) 96%, transparent) !important;
+    border: 1px solid color-mix(in srgb, var(--text) 18%, transparent) !important;
+    box-shadow: 0 8px 28px rgba(0,0,0,.28) !important;
+    isolation: isolate;
+  }
+  .bottom-liquid-indicator {
+    inset: 4px !important;
+    width: calc((100% - 8px) / 5) !important;
+    border-radius: 999px !important;
+    transition: transform .2s ease-out !important;
+    pointer-events: none !important;
+  }
+  .bottom-nav-link {
+    position: relative !important;
+    z-index: 2 !important;
+    display: flex !important;
+    min-width: 0 !important;
+    min-height: 48px !important;
+    padding: 5px 1px !important;
+    gap: 3px !important;
+    justify-content: center !important;
+    border-radius: 999px !important;
+    font-size: clamp(7px, 2.15vw, 9px) !important;
+    line-height: 1.05 !important;
+    transform: none !important;
+    transition: color .12s ease !important;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .bottom-nav-link .icon { width: 16px !important; height: 16px !important; flex: 0 0 auto; }
+  .bottom-nav-link span { max-width: 100%; text-align: center; overflow: hidden; text-overflow: ellipsis; }
+  .bottom-nav-link.active { color: var(--accent-ink) !important; }
+
+  /* Homepage feature area: avoid clipped text and oversized calls to action. */
+  .hero {
+    min-height: min(740px, 88vh) !important;
+    min-height: min(740px, 88svh) !important;
+    align-items: flex-end !important;
+    padding: 112px 20px 100px !important;
+  }
+  .hero-content { width: 100% !important; max-width: 100% !important; min-width: 0; }
+  .hero h1 { max-width: 100%; font-size: clamp(36px, 10vw, 60px) !important; line-height: .96 !important; letter-spacing: -.055em !important; overflow-wrap: anywhere; margin: 12px 0 12px !important; }
+  .hero .meta-row { gap: 7px !important; margin: 12px 0 !important; font-size: 10px !important; }
+  .hero-copy { max-width: 100% !important; font-size: 12px !important; line-height: 1.55 !important; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+  .hero-actions { display: flex !important; align-items: center; gap: 10px !important; margin-top: 18px !important; flex-wrap: nowrap !important; }
+  .hero-actions .hero-action-circle {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    flex: 0 0 44px;
+    gap: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: none !important;
+  }
+  .hero-actions .hero-action-circle .icon { width: 18px !important; height: 18px !important; }
+  .hero-action-label { display: none !important; }
+  .hero-dots { right: 18px !important; bottom: 27px !important; max-width: 38vw !important; }
+  .hero-controls { left: 12px !important; right: 12px !important; bottom: 17px !important; }
+
+  /* Consistent edge spacing and no accidental horizontal overflow across pages. */
+  .section, .provider-section { padding: 22px 16px 24px !important; }
+  .section-header { align-items: flex-start !important; gap: 10px !important; flex-wrap: wrap; }
+  .section h2 { font-size: clamp(18px, 5vw, 22px) !important; line-height: 1.15; overflow-wrap: anywhere; }
+  .section-kicker, .eyebrow { font-size: 8px; }
+  .card-row, .rank-row, .people-row, .provider-row, .source-pills, .watch-season-tabs {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y;
+  }
+  .page-shell { padding: 100px 15px 36px !important; }
+  .page-top { align-items: flex-start !important; margin-bottom: 20px !important; gap: 14px !important; }
+  .page-title { font-size: clamp(34px, 10vw, 48px) !important; line-height: .98 !important; overflow-wrap: anywhere; }
+  .page-intro { font-size: 12px; line-height: 1.6; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 17px 11px !important; }
+  .movie-card, .person-result-card { min-width: 0; }
+  .movie-card .card-title, .movie-card h3, .movie-card strong { overflow-wrap: anywhere; }
+  .catalog-hero { padding-inline: 0 !important; }
+  .filter-bar { min-width: 0; max-width: 100%; flex-wrap: wrap; }
+  .filter-control, .filter-select, .setting-select { max-width: 100%; min-width: 0; }
+  .catalog-summary { margin-top: 0; }
+
+  /* Contact links and footer columns stay readable and clear of the fixed navbar. */
+  .footer { margin-top: 30px !important; padding: 28px 16px calc(32px + env(safe-area-inset-bottom, 0px)) !important; }
+  .footer-main { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; gap: 24px 16px !important; }
+  .footer-brand-block { grid-column: 1 / -1; min-width: 0; }
+  .footer-note { grid-column: 1 / -1; min-width: 0; }
+  .footer-brand-block p, .footer-note p { font-size: 11px !important; }
+  .footer-contact-links { display: grid; gap: 9px; margin-top: 16px; }
+  .footer-contact-links a { display: inline-flex; align-items: center; gap: 10px; width: fit-content; max-width: 100%; min-height: 40px; padding: 8px 11px; border: 1px solid color-mix(in srgb, var(--text) 14%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--surface-solid) 68%, transparent); color: var(--text); font-size: 11px; font-weight: 700; overflow-wrap: anywhere; }
+  .footer-contact-links .icon { width: 17px; height: 17px; color: var(--muted); }
+  .footer-contact-links span { overflow-wrap: anywhere; }
+  .footer-bottom { align-items: flex-start !important; flex-wrap: wrap !important; gap: 11px 16px !important; font-size: 10px !important; }
+  .footer-top { min-height: 36px; font-size: 10px !important; }
+
+  /* Overlays remain independently scrollable on short phone viewports. */
+  .global-search-panel { max-height: calc(100dvh - 86px) !important; overflow-y: auto !important; overscroll-behavior: contain; }
+  .search-results { max-height: min(44dvh, 350px) !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch; }
+  .modal-backdrop { align-items: start !important; overflow-y: auto !important; padding: 12px !important; -webkit-overflow-scrolling: touch; }
+  .modal-card { max-height: calc(100dvh - 24px) !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch; }
+  .detail-modal-backdrop { padding: 68px 10px 16px !important; }
+  .watch-page { padding-top: 94px !important; padding-bottom: 104px !important; }
+  .watch-layout, .watch-layout.has-episodes, .watch-layout.movie-watch-layout { padding-inline: 12px !important; }
+  .watch-heading { flex-wrap: wrap; gap: 10px !important; }
+  .watch-heading-actions { width: 100%; gap: 7px !important; }
+  .watch-heading-actions .btn { min-height: 40px; }
+  .episode-grid { max-height: 55dvh !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch; }
+  .source-pills { max-width: 100%; }
+}
+
+@media (max-width: 380px) {
+  .hero { padding-inline: 16px !important; }
+  .hero h1 { font-size: clamp(33px, 10vw, 42px) !important; }
+  .brand-word { font-size: 10px !important; }
+  .header-icon { width: 35px !important; }
+  .bottom-liquid-nav { width: calc(100vw - 12px) !important; padding: 4px !important; }
+  .bottom-nav-link { font-size: 7px !important; }
+  .footer-main { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; }
+  .footer-column a, .footer-column button { font-size: 11px !important; }
+}
