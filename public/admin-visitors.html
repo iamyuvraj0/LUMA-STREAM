@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#0b0d0c">
+  <title>Live Visitors · STREAM SUNAA Admin</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/assets/admin-visitors.css">
+  <script defer src="/assets/admin-visitors.js"></script>
+</head>
+<body>
+  <main class="dashboard-shell">
+    <header class="dashboard-header">
+      <a class="admin-brand" href="/" aria-label="STREAM SUNAA home"><span class="brand-mark">S</span><span><strong>STREAM SUNAA</strong><small>PRIVATE ADMIN</small></span></a>
+      <div class="header-tools"><span class="live-indicator"><i></i> LIVE</span><button id="refresh-button" class="refresh-button" type="button"><span aria-hidden="true">↻</span> Refresh</button><a class="site-link" href="/" rel="noopener">Open site ↗</a></div>
+    </header>
+
+    <section class="intro-row">
+      <div><span class="eyebrow">Audience overview</span><h1>Live visitors</h1><p>Anonymous activity across STREAM SUNAA, refreshed every five seconds.</p></div>
+      <div class="updated-block"><span>Last updated</span><strong id="last-updated">Waiting for data…</strong></div>
+    </section>
+
+    <p id="dashboard-status" class="status-line" role="status" aria-live="polite">Connecting to live activity…</p>
+
+    <section class="stat-grid" aria-label="Visitor summaries">
+      <article class="stat-card stat-highlight"><span>Active visitors</span><strong id="active-count">—</strong><small>Last 75 seconds</small></article>
+      <article class="stat-card"><span>On a watch page</span><strong id="watch-count">—</strong><small>Viewing a STREAM SUNAA player page</small></article>
+      <article class="stat-card"><span>Mobile visitors</span><strong id="mobile-count">—</strong><small>Phones and small touch devices</small></article>
+      <article class="stat-card"><span>Desktop visitors</span><strong id="desktop-count">—</strong><small>Desktop and laptop browsers</small></article>
+    </section>
+
+    <section class="content-grid">
+      <article class="panel active-panel">
+        <div class="panel-heading"><div><span class="eyebrow">Right now</span><h2>Active sessions</h2></div><span id="active-pill" class="count-pill">0 active</span></div>
+        <div id="active-visitors" class="active-list"><div class="empty-state">Waiting for the first visitor heartbeat.</div></div>
+      </article>
+      <article class="panel popular-panel">
+        <div class="panel-heading"><div><span class="eyebrow">Where people are</span><h2>Popular right now</h2></div></div>
+        <div id="popular-pages" class="popular-list"><div class="empty-state">No page activity yet.</div></div>
+        <div class="device-breakdown"><div><span>Tablet</span><strong id="tablet-count">0</strong></div><div><span>Mobile</span><strong id="device-mobile-count">0</strong></div><div><span>Desktop</span><strong id="device-desktop-count">0</strong></div></div>
+      </article>
+    </section>
+
+    <section class="panel activity-panel">
+      <div class="panel-heading"><div><span class="eyebrow">Recent changes</span><h2>Live activity feed</h2></div><span class="panel-note">Latest 80 events held in memory</span></div>
+      <div class="table-wrap"><table><thead><tr><th>Visitor</th><th>Activity</th><th>Title / page</th><th>Device</th><th>Time</th></tr></thead><tbody id="activity-rows"><tr><td colspan="5" class="empty-state">No page visits yet.</td></tr></tbody></table></div>
+    </section>
+
+    <footer class="dashboard-footer"><span>Privacy-first analytics · random browser ID · no IP or full user-agent stored</span><span id="retention-note">Live data is temporary.</span></footer>
+  </main>
+</body>
+</html>

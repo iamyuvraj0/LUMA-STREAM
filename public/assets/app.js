@@ -96,8 +96,53 @@ const state = {
   scrollFrame: 0,
   gradientStretchTimer: 0,
   watchMessageHandler: null,
+  watchPersistHandler: null,
   settings: loadSettings(),
 };
+
+// Anonymous live presence. The server receives a random browser ID, a coarse device
+// class and the current internal page/title only; no account, IP or full user-agent is stored.
+const VISITOR_ID_KEY = 'sunaa-anonymous-visitor-id';
+let ephemeralVisitorId = '';
+function anonymousVisitorId() {
+  let id = safeStorageGet(VISITOR_ID_KEY, '') || ephemeralVisitorId;
+  if (!/^[a-f0-9-]{36}$/i.test(id)) {
+    try { id = crypto.randomUUID(); }
+    catch { id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }); }
+    safeStorageSet(VISITOR_ID_KEY, id);
+  }
+  ephemeralVisitorId = id;
+  return id;
+}
+function visitorDeviceClass() {
+  const ua = String(navigator.userAgent || '');
+  if (/iPad|Tablet|PlayBook|Silk/i.test(ua) || (/Android/i.test(ua) && !/Mobile/i.test(ua))) return 'tablet';
+  if (/Mobi|Android|iPhone|iPod|IEMobile|Windows Phone/i.test(ua) || window.matchMedia?.('(pointer: coarse)').matches) return 'mobile';
+  return 'desktop';
+}
+function sendAnonymousVisitorHeartbeat() {
+  if (location.pathname.startsWith('/admin/')) return;
+  const heading = document.querySelector('.watch-title, .hero h1, .details-copy h1, .page-top .page-title, #main-content h1');
+  const title = String(heading?.textContent || document.title || 'Browsing STREAM SUNAA').replace(/\s+/g, ' ').trim().slice(0, 120);
+  const payload = { id: anonymousVisitorId(), path: location.pathname, title, device: visitorDeviceClass() };
+  fetch('/api/analytics/heartbeat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    credentials: 'same-origin',
+    cache: 'no-store',
+    keepalive: document.visibilityState === 'hidden',
+  }).catch(() => {});
+}
+function startAnonymousVisitorTracking() {
+  sendAnonymousVisitorHeartbeat();
+  window.setInterval(sendAnonymousVisitorHeartbeat, 20_000);
+  document.addEventListener('click', event => {
+    if (event.target instanceof Element && event.target.closest('a[data-link]')) window.setTimeout(sendAnonymousVisitorHeartbeat, 900);
+  }, true);
+  window.addEventListener('popstate', () => window.setTimeout(sendAnonymousVisitorHeartbeat, 900));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) sendAnonymousVisitorHeartbeat(); });
+}
 
 const icon = {
   search: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>',
@@ -227,6 +272,13 @@ function formatMinutes(minutes) {
   const h = Math.floor(value / 60);
   const m = value % 60;
   return h ? `${h}h ${m}m` : `${m}m`;
+}
+function formatPlaybackTime(seconds) {
+  const total = Math.max(0, Math.floor(Number(seconds) || 0));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const secs = total % 60;
+  return hours ? `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}` : `${minutes}:${String(secs).padStart(2, '0')}`;
 }
 function dedupeBy(items, key) { return [...new Map(items.filter(Boolean).map(item => [item[key], item])).values()]; }
 function showToast(text) {
@@ -743,7 +795,7 @@ function providerRow(providers = []) {
     const brand = providerBrand(p.provider_name);
     const logo = localLogoByBrand.get(brand) || p.logo;
     const providerId = Number(p.provider_id);
-    return `<a class="provider-tile provider-${providerBrand(p.provider_name)}" href="/movies?provider=${providerId}" data-link data-provider-browse="${providerId}" title="Browse movies on ${escapeHtml(p.provider_name)}" aria-label="Browse movies on ${escapeHtml(p.provider_name)}"><span class="provider-logo-frame">${logo ? `<img src="${escapeHtml(logo)}" loading="lazy" decoding="async" alt="${escapeHtml(p.provider_name)} logo">` : `<span class="provider-initials">${escapeHtml(p.provider_name).slice(0,2).toUpperCase()}</span>`}</span><strong>${escapeHtml(p.provider_name)}</strong></a>`;
+    return `<a class="provider-tile provider-${providerBrand(p.provider_name)}" href="/movies?provider=${providerId}" data-link data-provider-browse="${providerId}" title="Browse movies on ${escapeHtml(p.provider_name)}" aria-label="Browse movies on ${escapeHtml(p.provider_name)}"><span class="provider-logo-frame">${logo ? `<img src="${escapeHtml(logo)}" loading="lazy" decoding="async" alt="${escapeHtml(p.provider_name)} logo"><span class="provider-logo-fallback" aria-hidden="true">${escapeHtml(p.provider_name)}</span>` : `<span class="provider-initials">${escapeHtml(p.provider_name).slice(0,2).toUpperCase()}</span>`}</span><strong>${escapeHtml(p.provider_name)}</strong></a>`;
   }).join('')}</div></div></section>`;
 }
 function providerCatalogSwitch(providerId, isTv, providers = []) {
@@ -783,7 +835,7 @@ function continueWatchingSection() {
     const duration = Number(entry.duration) || 0;
     const position = Number(entry.resumeSeconds) || 0;
     const remaining = duration > position && position > 0 ? `${formatMinutes(Math.max(1, Math.ceil((duration - position) / 60)))} left` : '';
-    const secondary = [type === 'tv' ? `Season ${season} · Episode ${episode}` : '', remaining || (progress > 0 ? `${Math.round(progress)}% watched` : 'Ready to resume')].filter(Boolean).join(' · ');
+    const secondary = [type === 'tv' ? `Season ${season} · Episode ${episode}` : '', position > 15 ? `Resume at ${formatPlaybackTime(position)}` : (progress > 0 ? `${Math.round(progress)}% watched` : 'Ready to resume'), remaining].filter(Boolean).join(' · ');
     const image = entry.poster || '';
     return `<a class="movie-card continue-card" href="${href}" data-link aria-label="Continue watching ${escapeHtml(entry.title)}${type === 'tv' ? ` season ${season}, episode ${episode}` : ''}"><div class="poster-wrap continue-poster-wrap">${image ? `<img loading="lazy" decoding="async" src="${escapeHtml(image)}" alt="${escapeHtml(entry.title)} poster">` : `<div class="poster-fallback">No artwork</div>`}<span class="continue-progress-track" aria-label="${Math.round(progress)} percent watched"><i style="width:${progress}%"></i></span><span class="continue-play">${iconWrap('play')}</span></div><div class="continue-card-copy"><strong>${escapeHtml(entry.title)}</strong><span>${escapeHtml(secondary)}</span></div></a>`;
   }).join('');
@@ -1254,7 +1306,8 @@ function externalDownloadOptionsMarkup({ type, id, season, episode } = {}) {
   } else {
     vidVaultUrl = `https://vidvault.to/movie/${mediaId}`;
   }
-  return `<section class="download-provider-options" aria-label="Download provider"><div class="download-provider-heading"><strong>Download with VidVault</strong><span>Open VidVault to see the resolutions and mirrors currently available.</span></div><div class="download-provider-links"><a class="download-provider-link" href="${escapeHtml(vidVaultUrl)}" target="_blank" rel="noopener noreferrer"><span class="download-provider-icon">${iconWrap('download')}</span><span class="download-provider-copy"><strong>VidVault</strong><small>Resolution conversion &amp; downloads</small></span>${iconWrap('external')}</a></div></section>`;
+  const allFlixUrl = 'https://allflix.org/';
+  return `<section class="download-provider-options" aria-label="Download providers"><div class="download-provider-heading"><strong>External download providers</strong><span>Open a provider to check the releases, resolutions, and mirrors it currently lists for this title.</span></div><div class="download-provider-links"><a class="download-provider-link" href="${escapeHtml(allFlixUrl)}" target="_blank" rel="noopener noreferrer"><span class="download-provider-icon">${iconWrap('download')}</span><span class="download-provider-copy"><strong>AllFlix</strong><small>Browse available releases · 4K when listed</small></span>${iconWrap('external')}</a><a class="download-provider-link" href="${escapeHtml(vidVaultUrl)}" target="_blank" rel="noopener noreferrer"><span class="download-provider-icon">${iconWrap('download')}</span><span class="download-provider-copy"><strong>VidVault</strong><small>Resolution options &amp; mirrors</small></span>${iconWrap('external')}</a></div></section>`;
 }
 
 async function openDownloadModal({ type, id, season, episode, title, provider, opener } = {}) {
@@ -1407,6 +1460,19 @@ async function renderWatch(type, id) {
     let episodeSequence = 0;
     let lastSavedEpisodeKey = '';
     let lastSavedTimeBucket = -1;
+    let latestCurrentTime = initialResumeSeconds;
+    let latestDuration = sameSavedEpisode ? Number(previousWatch.duration) || 0 : 0;
+    const persistLatestPlayback = () => {
+      if (!player?.isConnected || !Number.isFinite(latestCurrentTime) || latestCurrentTime < 0) return;
+      const progress = latestDuration > 0 ? Math.max(0, Math.min(100, latestCurrentTime / latestDuration * 100)) : undefined;
+      updateWatchHistory(item, {
+        season: isSeries ? season : null, episode: isSeries ? episode : null,
+        progress, resumeSeconds: latestCurrentTime, duration: latestDuration || undefined,
+        sourceName: activeSourceName,
+      });
+    };
+    state.watchPersistHandler = persistLatestPlayback;
+    window.addEventListener('pagehide', persistLatestPlayback);
 
     const setSource = url => { if (player && url) player.src = url; };
     const refreshWatchTitle = () => {
@@ -1474,6 +1540,7 @@ async function renderWatch(type, id) {
       const targetSeason = Math.max(1, Number(newSeason) || 1);
       const targetEpisode = Math.max(1, Number(newEpisode) || 1);
       const sameEpisode = targetSeason === season && targetEpisode === episode;
+      if (!sameEpisode) { latestCurrentTime = 0; latestDuration = 0; }
       const previous = watchHistoryEntry(type, id);
       const resumeSeconds = sameEpisode && Number(previous?.resumeSeconds) > 15 && Number(previous?.progress) < 96 ? Number(previous.resumeSeconds) : 0;
       season = targetSeason;
@@ -1496,28 +1563,42 @@ async function renderWatch(type, id) {
     setSource(initialSource.url);
     if (isSeries) await loadSeason(season);
 
-    // VidKing documents PLAYER_EVENT messages with currentTime/duration and season/episode.
-    // Accept messages only from the active iframe and its exact, known origin.
+    // Playback position is available only from providers that expose postMessage events.
+    // Validate both the active iframe Window and its exact origin before reading any payload.
     if (state.watchMessageHandler) window.removeEventListener('message', state.watchMessageHandler);
     state.watchMessageHandler = event => {
-      if (!player?.isConnected || event.source !== player.contentWindow || activeSourceName !== 'VidKing') return;
-      if (!['https://www.vidking.net', 'https://vidking.net'].includes(event.origin)) return;
+      const allowedOrigins = {
+        'VidKing': ['https://www.vidking.net', 'https://vidking.net'],
+        'VidSrc': ['https://vidsrc.sh', 'https://www.vidsrc.sh'],
+        'VidSrc TW': ['https://vidsrc.tw', 'https://www.vidsrc.tw'],
+      }[activeSourceName] || [];
+      if (!player?.isConnected || event.source !== player.contentWindow || !allowedOrigins.includes(event.origin)) return;
       let envelope = event.data;
       if (typeof envelope === 'string') {
         try { envelope = JSON.parse(envelope); } catch { return; }
       }
-      if (!envelope || typeof envelope !== 'object' || envelope.type !== 'PLAYER_EVENT' || !envelope.data || typeof envelope.data !== 'object') return;
+      if (!envelope || typeof envelope !== 'object') return;
+      const isVidKing = activeSourceName === 'VidKing';
+      const isVidSrc = ['VidSrc', 'VidSrc TW'].includes(activeSourceName);
+      if (envelope.type !== 'PLAYER_EVENT' || !envelope.data || typeof envelope.data !== 'object') return;
       const payload = envelope.data;
-      if (String(payload.id ?? '') !== String(id)) return;
-      if (payload.mediaType && !((isSeries && ['tv', 'series'].includes(String(payload.mediaType).toLowerCase())) || (!isSeries && String(payload.mediaType).toLowerCase() === 'movie'))) return;
-      const eventName = String(payload.event || '').toLowerCase();
+      const playerInfo = payload.player_info && typeof payload.player_info === 'object' ? payload.player_info : {};
+      const reportedId = isVidSrc ? (playerInfo.tmdb ?? playerInfo.id ?? payload.id) : payload.id;
+      if (reportedId !== undefined && String(reportedId) !== String(id)) return;
+      if (reportedId === undefined) return;
+      const payloadMediaType = payload.mediaType ?? payload.media_type ?? playerInfo.type ?? playerInfo.mediaType;
+      if (payloadMediaType && !((isSeries && ['tv', 'series'].includes(String(payloadMediaType).toLowerCase())) || (!isSeries && String(payloadMediaType).toLowerCase() === 'movie'))) return;
+      const rawEventName = String(payload.event || payload.player_status || '').toLowerCase();
+      const eventName = ({ playing: 'timeupdate', paused: 'pause', completed: 'ended' })[rawEventName] || rawEventName;
       if (!['timeupdate', 'play', 'pause', 'seeked', 'ended'].includes(eventName)) return;
 
-      const reportedSeason = Number(payload.season);
-      const reportedEpisode = Number(payload.episode);
+      const reportedSeason = Number(payload.season ?? playerInfo.season);
+      const reportedEpisode = Number(payload.episode ?? playerInfo.episode);
       const hasEpisode = isSeries && Number.isInteger(reportedSeason) && reportedSeason > 0 && Number.isInteger(reportedEpisode) && reportedEpisode > 0;
       const episodeChanged = hasEpisode && (reportedSeason !== season || reportedEpisode !== episode);
       if (episodeChanged) {
+        latestCurrentTime = 0;
+        latestDuration = 0;
         season = reportedSeason;
         episode = reportedEpisode;
         history.replaceState({}, '', watchPathFor('tv', id, season, episode));
@@ -1529,16 +1610,22 @@ async function renderWatch(type, id) {
         lastSavedTimeBucket = -1;
       }
 
-      // Current VidKing builds use currentTime; accept timestamp only when it is a plausible
-      // seconds offset (some player builds documented it under that name).
+      // VidKing reports currentTime/duration. VidSrc reports player_progress in seconds.
+      // VidKing's timestamp field may be epoch milliseconds, so never treat a large value as time.
       const reportedTimestamp = Number(payload.timestamp);
-      const reportedCurrentTime = payload.currentTime ?? (Number.isFinite(reportedTimestamp) && reportedTimestamp >= 0 && reportedTimestamp < 60 * 60 * 24 ? reportedTimestamp : undefined);
+      const reportedCurrentTime = isVidSrc
+        ? (payload.player_progress ?? payload.currentTime ?? payload.current_time ?? payload.position)
+        : (payload.currentTime ?? payload.current_time ?? payload.position ?? (Number.isFinite(reportedTimestamp) && reportedTimestamp >= 0 && reportedTimestamp < 60 * 60 * 24 ? reportedTimestamp : undefined));
       const currentTime = Number(reportedCurrentTime);
-      const duration = Number(payload.duration);
+      const duration = Number(payload.duration ?? payload.videoDuration ?? payload.player_info?.duration);
       const numericProgress = Number(payload.progress);
-      let progress = Number.isFinite(numericProgress) ? Math.max(0, Math.min(100, numericProgress)) : (Number.isFinite(currentTime) && duration > 0 ? Math.max(0, Math.min(100, currentTime / duration * 100)) : undefined);
+      let progress = Number.isFinite(numericProgress)
+        ? Math.max(0, Math.min(100, numericProgress <= 1 && numericProgress > 0 ? numericProgress * 100 : numericProgress))
+        : (Number.isFinite(currentTime) && duration > 0 ? Math.max(0, Math.min(100, currentTime / duration * 100)) : undefined);
       if (eventName === 'ended') progress = 100;
       const safeCurrentTime = Number.isFinite(currentTime) && currentTime >= 0 && currentTime < 60 * 60 * 24 ? currentTime : undefined;
+      if (Number.isFinite(safeCurrentTime)) latestCurrentTime = safeCurrentTime;
+      if (Number.isFinite(duration) && duration > 0) latestDuration = duration;
       const timeBucket = Number.isFinite(safeCurrentTime) ? Math.floor(safeCurrentTime / 5) : -1;
       const episodeKey = `${season}:${episode}`;
       const isImportantEvent = ['pause', 'seeked', 'ended'].includes(eventName) || episodeChanged || episodeKey !== lastSavedEpisodeKey;
@@ -1567,10 +1654,11 @@ function buildSources(type, id, season, episode, details = null, resumeSeconds =
   const e = Math.max(1, Number(episode) || 1);
   const imdbId = details?.imdb_id || details?.external_ids?.imdb_id || '';
   const progressParam = Number(resumeSeconds) > 15 ? `&progress=${Math.floor(Number(resumeSeconds))}` : '';
+  const startAtParam = Number(resumeSeconds) > 15 ? `?startAt=${Math.floor(Number(resumeSeconds))}` : '';
   const map = {
     'VidKing': { name:'VidKing', url:movie ? `https://www.vidking.net/embed/movie/${encoded}?autoPlay=${state.settings.autoplay}&nextEpisode=true&episodeSelector=true${progressParam}` : `https://www.vidking.net/embed/tv/${encoded}/${s}/${e}?autoPlay=${state.settings.autoplay}&nextEpisode=true&episodeSelector=true${progressParam}` },
-    'VidSrc': { name:'VidSrc', url:movie ? `https://vidsrc.sh/embed/movie/${encoded}` : `https://vidsrc.sh/embed/tv/${encoded}/${s}/${e}` },
-    'VidSrc TW': { name:'VidSrc TW', url:movie ? `https://vidsrc.tw/embed/movie/${encoded}` : `https://vidsrc.tw/embed/tv/${encoded}/${s}/${e}` },
+    'VidSrc': { name:'VidSrc', url:movie ? `https://vidsrc.sh/embed/movie/${encoded}${startAtParam}` : `https://vidsrc.sh/embed/tv/${encoded}/${s}/${e}${startAtParam}` },
+    'VidSrc TW': { name:'VidSrc TW', url:movie ? `https://vidsrc.tw/embed/movie/${encoded}${startAtParam}` : `https://vidsrc.tw/embed/tv/${encoded}/${s}/${e}${startAtParam}` },
     'VidSrc Link': { name:'VidSrc Link', url:movie ? `https://vidsrc.link/embed/movie/${encoded}` : `https://vidsrc.link/embed/tv/${encoded}/${s}/${e}` },
     'VidSrc Wiki': { name:'VidSrc Wiki', url:movie ? `https://vidsrc.wiki/embed/movie/${encoded}` : `https://vidsrc.wiki/embed/tv/${encoded}/${s}/${e}` },
     'VidSrc API': { name:'VidSrc API', url:movie ? `https://vidsrc.sh/embed/movie?tmdb=${encoded}` : `https://vidsrc.sh/embed/tv?tmdb=${encoded}&season=${s}&episode=${e}` },
@@ -1871,6 +1959,11 @@ function navigate(url) {
 }
 function routeParts() { return location.pathname.replace(/\/+$/, '').split('/').filter(Boolean); }
 async function router() {
+  if (state.watchPersistHandler) {
+    try { state.watchPersistHandler(); } catch { /* Preserve navigation if a provider has stale playback state. */ }
+    window.removeEventListener('pagehide', state.watchPersistHandler);
+    state.watchPersistHandler = null;
+  }
   if (state.watchMessageHandler) { window.removeEventListener('message', state.watchMessageHandler); state.watchMessageHandler = null; }
   state.renderSequence += 1;
   const parts = routeParts();
@@ -2073,6 +2166,22 @@ document.addEventListener('input', event => {
 document.addEventListener('error', event => {
   const image = event.target;
   if (!(image instanceof HTMLImageElement) || image.dataset.fallbackApplied) return;
+  if (image.closest('.provider-logo-frame')) {
+    image.dataset.fallbackApplied = 'true';
+    image.hidden = true;
+    image.style.setProperty('display', 'none', 'important');
+    const fallback = image.parentElement?.querySelector('.provider-logo-fallback');
+    if (fallback) { fallback.hidden = false; fallback.classList.add('visible'); }
+    else {
+      const name = image.alt.replace(/\s+logo$/i, '').trim() || 'Provider';
+      const mark = document.createElement('span');
+      mark.className = 'provider-initials';
+      mark.textContent = name.slice(0, 2).toUpperCase();
+      mark.setAttribute('aria-hidden', 'true');
+      image.parentElement?.append(mark);
+    }
+    return;
+  }
   let source = '';
   try { source = new URL(image.currentSrc || image.src, location.origin).hostname; } catch { return; }
   if (source !== 'image.tmdb.org') return;
@@ -2123,3 +2232,4 @@ async function bootApp() {
   router();
 }
 bootApp();
+startAnonymousVisitorTracking();

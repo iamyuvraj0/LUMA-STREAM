@@ -4,7 +4,7 @@ import path from 'node:path';
 import { readFileSync } from 'node:fs';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash, timingSafeEqual } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { BoundedTTLCache } from './lib/bounded-cache.js';
 import { compressionMiddleware } from './lib/compression.js';
@@ -24,6 +24,69 @@ const TMDB_TOKEN = process.env.TMDB_TOKEN;
 const SUPPORTED_REGIONS = new Set(['NP', 'US', 'GB', 'IN', 'AU', 'CA']);
 const configuredRegion = String(process.env.TMDB_REGION || 'NP').toUpperCase();
 const DEFAULT_TMDB_REGION = SUPPORTED_REGIONS.has(configuredRegion) ? configuredRegion : 'NP';
+
+// Anonymous, privacy-minimised live presence. Visitor IDs are random browser-generated
+// identifiers; the server deliberately does not retain IP addresses or full user agents.
+const liveVisitors = new Map();
+const recentVisitorActivity = [];
+const VISITOR_ACTIVE_MS = 75_000;
+const VISITOR_RETENTION_MS = 30 * 60_000;
+const MAX_VISITOR_SESSIONS = 5_000;
+const MAX_VISITOR_EVENTS = 200;
+
+function secretMatches(candidate, expected) {
+  const a = createHash('sha256').update(String(candidate)).digest();
+  const b = createHash('sha256').update(String(expected)).digest();
+  return timingSafeEqual(a, b);
+}
+
+function requireAdmin(req, res, next) {
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  const expectedPassword = String(process.env.ADMIN_PASSWORD || '');
+  if (expectedPassword.length < 12) {
+    return res.status(503).type('text/plain').send('Visitor dashboard is not configured yet. Set ADMIN_PASSWORD to a strong password of at least 12 characters in the Render environment, then redeploy. Optionally set ADMIN_USERNAME (default: admin).');
+  }
+  const match = /^Basic\s+([A-Za-z0-9+/=]+)$/i.exec(String(req.headers.authorization || ''));
+  if (!match) {
+    res.setHeader('WWW-Authenticate', 'Basic realm="STREAM SUNAA Admin", charset="UTF-8"');
+    return res.status(401).type('text/plain').send('Admin authentication required.');
+  }
+  let decoded = '';
+  try { decoded = Buffer.from(match[1], 'base64').toString('utf8'); } catch {}
+  const separator = decoded.indexOf(':');
+  const username = separator >= 0 ? decoded.slice(0, separator) : '';
+  const password = separator >= 0 ? decoded.slice(separator + 1) : '';
+  const expectedUsername = String(process.env.ADMIN_USERNAME || 'admin');
+  if (!secretMatches(username, expectedUsername) || !secretMatches(password, expectedPassword)) {
+    res.setHeader('WWW-Authenticate', 'Basic realm="STREAM SUNAA Admin", charset="UTF-8"');
+    return res.status(401).type('text/plain').send('Incorrect admin credentials.');
+  }
+  next();
+}
+
+function cleanVisitorTitle(value) {
+  return String(value || 'Browsing STREAM SUNAA').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120) || 'Browsing STREAM SUNAA';
+}
+
+function cleanVisitorPath(value) {
+  const candidate = String(value || '/').slice(0, 300);
+  try {
+    const url = new URL(candidate, 'https://sunaa.invalid');
+    return url.origin === 'https://sunaa.invalid' ? url.pathname.slice(0, 160) : '/';
+  } catch { return '/'; }
+}
+
+function pruneVisitorState(now = Date.now()) {
+  for (const [id, visitor] of liveVisitors) {
+    if (now - visitor.lastSeen > VISITOR_RETENTION_MS) liveVisitors.delete(id);
+  }
+  while (liveVisitors.size > MAX_VISITOR_SESSIONS) {
+    const oldest = liveVisitors.keys().next().value;
+    if (!oldest) break;
+    liveVisitors.delete(oldest);
+  }
+}
 function requestRegion(req) {
   const candidate = String(req.query.region || DEFAULT_TMDB_REGION).toUpperCase();
   return SUPPORTED_REGIONS.has(candidate) ? candidate : DEFAULT_TMDB_REGION;
@@ -75,7 +138,11 @@ app.use(express.static(path.join(__dirname, 'public'), {
   index: false,
   maxAge: '1h',
   setHeaders(res, filePath) {
-    if (path.extname(filePath).toLowerCase() === '.html') res.setHeader('Cache-Control', 'no-cache');
+    // Always revalidate frontend assets so deploys do not leave clients on stale UI code.
+    const ext = path.extname(filePath).toLowerCase();
+    if (['.html', '.css', '.js'].includes(ext)) {
+      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+    }
   },
 }));
 
@@ -89,6 +156,62 @@ const apiRateLimiter = new FixedWindowRateLimiter({ windowMs: 60_000, max: 120, 
 const searchRateLimiter = new FixedWindowRateLimiter({ windowMs: 60_000, max: 30, maxClients: 10_000 });
 app.use('/api', rateLimitMiddleware(apiRateLimiter));
 app.use('/api/search', rateLimitMiddleware(searchRateLimiter, { message: 'Too many searches. Please wait a moment and try again.' }));
+
+app.post('/api/analytics/heartbeat', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const id = String(req.body?.id || '');
+  if (!/^[a-f0-9-]{36}$/i.test(id)) return res.status(400).json({ error: 'Invalid anonymous visitor session.' });
+  const now = Date.now();
+  pruneVisitorState(now);
+  const pathName = cleanVisitorPath(req.body?.path);
+  const title = cleanVisitorTitle(req.body?.title);
+  const deviceValue = String(req.body?.device || 'desktop').toLowerCase();
+  const device = ['mobile', 'tablet', 'desktop'].includes(deviceValue) ? deviceValue : 'desktop';
+  const previous = liveVisitors.get(id);
+  const pageChanged = !previous || previous.path !== pathName || previous.title !== title || now - previous.lastSeen > VISITOR_ACTIVE_MS;
+  const visitor = {
+    id, label: `Visitor ${id.replace(/-/g, '').slice(-4).toUpperCase()}`,
+    firstSeen: previous?.firstSeen || now, lastSeen: now, path: pathName, title, device,
+  };
+  liveVisitors.delete(id);
+  liveVisitors.set(id, visitor);
+  if (pageChanged) {
+    recentVisitorActivity.unshift({
+      id: visitor.id, label: visitor.label, time: now, path: pathName, title, device,
+      action: previous ? 'Now viewing' : 'Arrived',
+    });
+    if (recentVisitorActivity.length > MAX_VISITOR_EVENTS) recentVisitorActivity.length = MAX_VISITOR_EVENTS;
+  }
+  res.status(204).end();
+});
+
+app.get('/admin/visitors', requireAdmin, (req, res) => {
+  res.type('html').sendFile(path.join(__dirname, 'public', 'admin-visitors.html'));
+});
+
+app.get('/admin/visitors/data', requireAdmin, (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const now = Date.now();
+  pruneVisitorState(now);
+  const active = [...liveVisitors.values()]
+    .filter(visitor => now - visitor.lastSeen <= VISITOR_ACTIVE_MS)
+    .sort((a, b) => b.lastSeen - a.lastSeen);
+  const pages = new Map();
+  for (const visitor of active) {
+    const key = `${visitor.path}|${visitor.title}`;
+    const row = pages.get(key) || { path: visitor.path, title: visitor.title, count: 0 };
+    row.count += 1;
+    pages.set(key, row);
+  }
+  res.json({
+    generatedAt: now, activeCount: active.length,
+    active: active.map(({ id, label, firstSeen, lastSeen, path: pagePath, title, device }) => ({ id: id.slice(-8), label, firstSeen, lastSeen, path: pagePath, title, device, watching: pagePath.startsWith('/watch/') })),
+    activity: recentVisitorActivity.slice(0, 80).map(({ id, label, time, path: pagePath, title, device, action }) => ({ id: id.slice(-8), label, time, path: pagePath, title, device, action })),
+    popularPages: [...pages.values()].sort((a, b) => b.count - a.count).slice(0, 8),
+    devices: { mobile: active.filter(x => x.device === 'mobile').length, tablet: active.filter(x => x.device === 'tablet').length, desktop: active.filter(x => x.device === 'desktop').length },
+    retention: 'Live sessions expire after 75 seconds without a heartbeat. Recent activity is in memory and clears when the server restarts or sleeps.',
+  });
+});
 
 function requireToken() {
   if (!TMDB_TOKEN) {

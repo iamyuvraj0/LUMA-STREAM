@@ -123,9 +123,11 @@ test('settings use a clean unframed section and global search has one close cont
 });
 
 
-test('download dialog exposes only VidVault provider pages for movies and episodes', () => {
+test('download dialog exposes AllFlix and VidVault external provider pages for movies and episodes', () => {
   assert.match(app, /function externalDownloadOptionsMarkup/);
   assert.doesNotMatch(app, /redflix\.co\/play/);
+  assert.match(app, /https:\/\/allflix\.org\//);
+  assert.match(app, /<strong>AllFlix<\/strong>/);
   assert.match(app, /https:\/\/vidvault\.to\/movie\/\$\{mediaId\}/);
   assert.match(app, /https:\/\/vidvault\.to\/tv\/\$\{mediaId\}\/\$\{seasonNumber\}\/\$\{episodeNumber\}/);
   assert.match(app, /target=\"_blank\" rel=\"noopener noreferrer\"/);

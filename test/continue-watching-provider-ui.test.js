@@ -73,7 +73,7 @@ test('rail control state is looked up on the containing section so provider arro
 });
 
 test('VidKing resume position tolerates currentTime or a plausible seconds timestamp', () => {
-  assert.match(app, /const reportedCurrentTime = payload\.currentTime \?\? \(Number\.isFinite\(reportedTimestamp\) && reportedTimestamp >= 0 && reportedTimestamp < 60 \* 60 \* 24 \? reportedTimestamp : undefined\)/);
+  assert.match(app, /const reportedCurrentTime = isVidSrc[\s\S]*?payload\.currentTime \?\? payload\.current_time/);
   assert.match(app, /const safeCurrentTime = Number\.isFinite\(currentTime\) && currentTime >= 0 && currentTime < 60 \* 60 \* 24/);
 });
 
