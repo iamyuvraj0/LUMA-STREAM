@@ -5,51 +5,61 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta name="referrer" content="no-referrer">
-  <meta name="theme-color" content="#0b0d0c">
-  <title>Live Visitors · STREAM SUNAA Admin</title>
+  <meta name="theme-color" content="#0b1110">
+  <title>Audience Studio · STREAM SUNAA</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="stylesheet" href="/assets/admin-visitors.css">
   <script defer src="/assets/admin-visitors.js"></script>
 </head>
 <body>
+  <div class="ambient ambient-one" aria-hidden="true"></div><div class="ambient ambient-two" aria-hidden="true"></div>
   <main class="dashboard-shell">
-    <header class="dashboard-header">
-      <a class="admin-brand" href="/" aria-label="STREAM SUNAA home"><span class="brand-mark">S</span><span><strong>STREAM SUNAA</strong><small>PRIVATE ADMIN</small></span></a>
-      <div class="header-tools"><span class="live-indicator"><i></i> LIVE</span><button id="refresh-button" class="refresh-button" type="button"><span aria-hidden="true">↻</span> Refresh</button><a class="site-link" href="/" rel="noopener">Open site ↗</a></div>
+    <header class="dashboard-header glass-surface">
+      <a class="admin-brand" href="/" aria-label="STREAM SUNAA home"><span class="brand-mark">S</span><span><strong>STREAM SUNAA</strong><small>AUDIENCE STUDIO</small></span></a>
+      <div class="header-tools"><span class="live-indicator"><i></i><span>LIVE MONITOR</span></span><button id="refresh-button" class="icon-button" type="button"><span aria-hidden="true">↻</span> Refresh</button><a class="site-link" href="/" rel="noopener">Open site <span aria-hidden="true">↗</span></a></div>
     </header>
 
     <section class="intro-row">
-      <div><span class="eyebrow">Audience overview</span><h1>Live visitors</h1><p>Anonymous activity across STREAM SUNAA, refreshed every five seconds.</p></div>
-      <div class="updated-block"><span>Last updated</span><strong id="last-updated">Waiting for data…</strong></div>
+      <div class="intro-copy"><span class="eyebrow"><span class="eyebrow-line"></span> PRIVATE ANALYTICS / OVERVIEW</span><h1>Know your <em>audience.</em></h1><p>Anonymous live presence, visitor history, device details and approximate geography.</p></div>
+      <div class="updated-block clay-surface"><span class="tiny-label">LAST SYNC</span><strong id="last-updated">Connecting…</strong><span class="sync-pulse"><i></i> Auto-refresh every 5 seconds</span></div>
     </section>
 
-    <p id="dashboard-status" class="status-line" role="status" aria-live="polite">Connecting to live activity…</p>
+    <section class="status-card glass-surface" aria-live="polite"><span class="status-symbol" aria-hidden="true">✳</span><p id="dashboard-status" role="status">Connecting to anonymous visitor activity…</p><span id="storage-pill" class="storage-pill">CHECKING STORAGE</span></section>
+    <div id="storage-warning" class="storage-warning" hidden></div>
 
-    <section class="stat-grid" aria-label="Visitor summaries">
-      <article class="stat-card stat-highlight"><span>Active visitors</span><strong id="active-count">—</strong><small>Last 75 seconds</small></article>
-      <article class="stat-card"><span>On a watch page</span><strong id="watch-count">—</strong><small>Viewing a STREAM SUNAA player page</small></article>
-      <article class="stat-card"><span>Mobile visitors</span><strong id="mobile-count">—</strong><small>Phones and small touch devices</small></article>
-      <article class="stat-card"><span>Desktop visitors</span><strong id="desktop-count">—</strong><small>Desktop and laptop browsers</small></article>
+    <section class="stat-grid" aria-label="Audience summaries">
+      <article class="stat-card glass-surface stat-live"><div class="stat-top"><span>Active now</span><span class="stat-icon green-icon">◉</span></div><strong id="active-count">—</strong><small>Seen in the last 75 seconds</small><div class="stat-bottom"><span class="micro-line"></span><span>LIVE PRESENCE</span></div></article>
+      <article class="stat-card glass-surface"><div class="stat-top"><span>Unique browsers</span><span class="stat-icon">◌</span></div><strong id="total-visitors">—</strong><small>Distinct anonymous browser IDs</small><div class="stat-bottom"><span>ALL-TIME RECORDED</span></div></article>
+      <article class="stat-card glass-surface"><div class="stat-top"><span>Page views</span><span class="stat-icon">▤</span></div><strong id="total-pageviews">—</strong><small>Recorded internal page changes</small><div class="stat-bottom"><span>CATALOGUE ACTIVITY</span></div></article>
+      <article class="stat-card glass-surface"><div class="stat-top"><span>Returning browsers</span><span class="stat-icon">↻</span></div><strong id="returning-count">—</strong><small>Browsers seen in a later visit</small><div class="stat-bottom"><span>RETENTION SIGNAL</span></div></article>
+      <article class="stat-card glass-surface"><div class="stat-top"><span>Mobile now</span><span class="stat-icon">▯</span></div><strong id="mobile-count">—</strong><small id="device-split">Tablet — · Desktop —</small><div class="stat-bottom"><span>DEVICE MIX</span></div></article>
+      <article class="stat-card glass-surface"><div class="stat-top"><span>Countries now</span><span class="stat-icon">◎</span></div><strong id="country-count">—</strong><small>Approximate IP-based location</small><div class="stat-bottom"><span>COARSE LOCATION ONLY</span></div></article>
     </section>
 
-    <section class="content-grid">
-      <article class="panel active-panel">
-        <div class="panel-heading"><div><span class="eyebrow">Right now</span><h2>Active sessions</h2></div><span id="active-pill" class="count-pill">0 active</span></div>
-        <div id="active-visitors" class="active-list"><div class="empty-state">Waiting for the first visitor heartbeat.</div></div>
+    <section class="main-grid">
+      <article class="panel glass-surface active-panel">
+        <div class="panel-heading"><div><span class="eyebrow">RIGHT NOW</span><h2>Live sessions</h2><p>What active browsers are viewing</p></div><span id="active-pill" class="count-pill">0 active</span></div>
+        <div id="active-visitors" class="active-list"><div class="empty-state">Waiting for the first visitor heartbeat…</div></div>
       </article>
-      <article class="panel popular-panel">
-        <div class="panel-heading"><div><span class="eyebrow">Where people are</span><h2>Popular right now</h2></div></div>
-        <div id="popular-pages" class="popular-list"><div class="empty-state">No page activity yet.</div></div>
-        <div class="device-breakdown"><div><span>Tablet</span><strong id="tablet-count">0</strong></div><div><span>Mobile</span><strong id="device-mobile-count">0</strong></div><div><span>Desktop</span><strong id="device-desktop-count">0</strong></div></div>
+      <article class="panel glass-surface geo-panel">
+        <div class="panel-heading"><div><span class="eyebrow">REACH</span><h2>Where they're from</h2><p>City/country guesses based on IP</p></div><span class="geo-globe" aria-hidden="true">◎</span></div>
+        <div id="country-list" class="country-list"><div class="empty-state">Location estimates will appear here when available.</div></div>
+        <div class="location-note"><span aria-hidden="true">ⓘ</span><span>IP location is approximate and can be wrong, especially with VPNs, mobile networks or proxies.</span></div>
       </article>
     </section>
 
-    <section class="panel activity-panel">
-      <div class="panel-heading"><div><span class="eyebrow">Recent changes</span><h2>Live activity feed</h2></div><span class="panel-note">Latest 80 events held in memory</span></div>
-      <div class="table-wrap"><table><thead><tr><th>Visitor</th><th>Activity</th><th>Title / page</th><th>Device</th><th>Time</th></tr></thead><tbody id="activity-rows"><tr><td colspan="5" class="empty-state">No page visits yet.</td></tr></tbody></table></div>
+    <section class="panel glass-surface history-panel">
+      <div class="panel-heading history-heading"><div><span class="eyebrow">LONG VIEW</span><h2>Visitor history</h2><p>Previous anonymous browsers are saved when PostgreSQL is connected.</p></div><div class="history-controls"><label class="search-field"><span aria-hidden="true">⌕</span><input id="history-search" type="search" autocomplete="off" placeholder="Search visitor, device, place…" aria-label="Search visitor history"></label><button id="history-search-button" class="icon-button" type="button">Search</button></div></div>
+      <div class="table-wrap history-wrap"><table><thead><tr><th>Visitor</th><th>Last page</th><th>Device details</th><th>Approx. location</th><th>Seen</th><th>Visits / views</th></tr></thead><tbody id="history-rows"><tr><td colspan="6" class="empty-state">Loading visitor history…</td></tr></tbody></table></div>
+      <div class="history-pagination"><span id="history-count">Waiting for visitor history…</span><div><button id="history-prev" class="pager-button" type="button" disabled>← Previous</button><button id="history-next" class="pager-button" type="button" disabled>Next →</button></div></div>
     </section>
 
-    <footer class="dashboard-footer"><span>Privacy-first analytics · random browser ID · no IP or full user-agent stored</span><span id="retention-note">Live data is temporary.</span></footer>
+    <section class="panel glass-surface activity-panel">
+      <div class="panel-heading"><div><span class="eyebrow">RECENT MOVEMENT</span><h2>Activity feed</h2><p>Arrivals, returns and page changes</p></div><span class="panel-note">Latest 120 events</span></div>
+      <div class="table-wrap"><table><thead><tr><th>Visitor</th><th>Event</th><th>Title / page</th><th>Device</th><th>Approx. location</th><th>Time</th></tr></thead><tbody id="activity-rows"><tr><td colspan="6" class="empty-state">No page visits yet.</td></tr></tbody></table></div>
+    </section>
+
+    <footer class="dashboard-footer"><span><strong>STREAM SUNAA</strong> · Privacy-minimised analytics</span><span>Random browser ID · no raw IP or full user-agent stored · <a href="/privacy.html">Analytics privacy notes</a></span></footer>
   </main>
 </body>
 </html>

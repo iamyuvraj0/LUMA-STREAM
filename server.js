@@ -15,9 +15,14 @@ import { createDownloadCatalog, safeFilename } from './lib/download-catalog.js';
 import { createProviderDownloadAdapter } from './lib/provider-downloads.js';
 import { createEmbedProviderRegistry } from './lib/embed-providers.js';
 import { streamDownloadFile } from './lib/download-http.js';
+import { VisitorAnalytics, parseDeviceInfo, lookupIpLocation, makeLocationLabel } from './lib/visitor-analytics.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
+// Trust only the explicitly configured hosting ingress. Avoid blindly trusting client-supplied X-Forwarded-For headers locally.
+const trustedProxyHops = Number.parseInt(process.env.TRUST_PROXY_HOPS || (process.env.RENDER ? '1' : '0'), 10);
+if (Number.isInteger(trustedProxyHops) && trustedProxyHops > 0 && trustedProxyHops <= 3) app.set('trust proxy', trustedProxyHops);
+const visitorAnalytics = new VisitorAnalytics();
 const parsedPort = Number.parseInt(process.env.PORT || '3000', 10);
 const PORT = Number.isInteger(parsedPort) && parsedPort >= 0 && parsedPort <= 65535 ? parsedPort : 3000;
 const TMDB_TOKEN = process.env.TMDB_TOKEN;
@@ -25,8 +30,9 @@ const SUPPORTED_REGIONS = new Set(['NP', 'US', 'GB', 'IN', 'AU', 'CA']);
 const configuredRegion = String(process.env.TMDB_REGION || 'NP').toUpperCase();
 const DEFAULT_TMDB_REGION = SUPPORTED_REGIONS.has(configuredRegion) ? configuredRegion : 'NP';
 
-// Anonymous, privacy-minimised live presence. Visitor IDs are random browser-generated
-// identifiers; the server deliberately does not retain IP addresses or full user agents.
+// Anonymous analytics stores random browser IDs and derived device/location fields only.
+// Raw IP addresses are used transiently for approximate IP geolocation and are not stored;
+// full user-agent strings are parsed server-side and are never persisted.
 const liveVisitors = new Map();
 const recentVisitorActivity = [];
 const VISITOR_ACTIVE_MS = 75_000;
@@ -157,7 +163,7 @@ const searchRateLimiter = new FixedWindowRateLimiter({ windowMs: 60_000, max: 30
 app.use('/api', rateLimitMiddleware(apiRateLimiter));
 app.use('/api/search', rateLimitMiddleware(searchRateLimiter, { message: 'Too many searches. Please wait a moment and try again.' }));
 
-app.post('/api/analytics/heartbeat', (req, res) => {
+app.post('/api/analytics/heartbeat', async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   const id = String(req.body?.id || '');
   if (!/^[a-f0-9-]{36}$/i.test(id)) return res.status(400).json({ error: 'Invalid anonymous visitor session.' });
@@ -165,20 +171,42 @@ app.post('/api/analytics/heartbeat', (req, res) => {
   pruneVisitorState(now);
   const pathName = cleanVisitorPath(req.body?.path);
   const title = cleanVisitorTitle(req.body?.title);
-  const deviceValue = String(req.body?.device || 'desktop').toLowerCase();
-  const device = ['mobile', 'tablet', 'desktop'].includes(deviceValue) ? deviceValue : 'desktop';
   const previous = liveVisitors.get(id);
-  const pageChanged = !previous || previous.path !== pathName || previous.title !== title || now - previous.lastSeen > VISITOR_ACTIVE_MS;
+  const parsedDevice = parseDeviceInfo(req.get('user-agent') || '', req.body?.deviceModel, req.body?.platform, req.body?.device);
+  let location = previous?.location || null;
+  if (process.env.VISITOR_GEOLOCATION !== 'false' && (!location || (!location.country && !location.city))) {
+    location = await lookupIpLocation(req.ip).catch(() => null) || { city: '', region: '', country: '', countryCode: '', source: '' };
+  }
   const visitor = {
-    id, label: `Visitor ${id.replace(/-/g, '').slice(-4).toUpperCase()}`,
-    firstSeen: previous?.firstSeen || now, lastSeen: now, path: pathName, title, device,
+    id,
+    label: `Visitor ${id.replace(/-/g, '').slice(-6).toUpperCase()}`,
+    firstSeen: previous?.firstSeen || now,
+    lastSeen: now,
+    path: pathName,
+    title,
+    ...parsedDevice,
+    location,
   };
+  let persistentResult = null;
+  if (visitorAnalytics.enabled) {
+    try {
+      persistentResult = await visitorAnalytics.recordHeartbeat(visitor);
+    } catch {
+      // Analytics outages must not break the public streaming catalogue. The dashboard
+      // will visibly report that persistent storage is temporarily unavailable.
+    }
+  }
+  const pageChangedInMemory = !previous || previous.path !== pathName || previous.title !== title || now - previous.lastSeen > VISITOR_ACTIVE_MS;
+  const pageChanged = persistentResult ? persistentResult.pageChanged : pageChangedInMemory;
   liveVisitors.delete(id);
   liveVisitors.set(id, visitor);
   if (pageChanged) {
+    const action = persistentResult?.action || (previous ? 'Now viewing' : 'Arrived');
     recentVisitorActivity.unshift({
-      id: visitor.id, label: visitor.label, time: now, path: pathName, title, device,
-      action: previous ? 'Now viewing' : 'Arrived',
+      id: visitor.id, label: visitor.label, time: now, path: pathName, title, device: visitor.device,
+      deviceModel: visitor.deviceModel, browser: visitor.browser, os: visitor.os,
+      city: location.city, region: location.region, country: location.country, countryCode: location.countryCode,
+      location: makeLocationLabel(location), locationSource: location.source, action,
     });
     if (recentVisitorActivity.length > MAX_VISITOR_EVENTS) recentVisitorActivity.length = MAX_VISITOR_EVENTS;
   }
@@ -189,7 +217,7 @@ app.get('/admin/visitors', requireAdmin, (req, res) => {
   res.type('html').sendFile(path.join(__dirname, 'public', 'admin-visitors.html'));
 });
 
-app.get('/admin/visitors/data', requireAdmin, (req, res) => {
+app.get('/admin/visitors/data', requireAdmin, async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   const now = Date.now();
   pruneVisitorState(now);
@@ -203,14 +231,53 @@ app.get('/admin/visitors/data', requireAdmin, (req, res) => {
     row.count += 1;
     pages.set(key, row);
   }
-  res.json({
-    generatedAt: now, activeCount: active.length,
-    active: active.map(({ id, label, firstSeen, lastSeen, path: pagePath, title, device }) => ({ id: id.slice(-8), label, firstSeen, lastSeen, path: pagePath, title, device, watching: pagePath.startsWith('/watch/') })),
-    activity: recentVisitorActivity.slice(0, 80).map(({ id, label, time, path: pagePath, title, device, action }) => ({ id: id.slice(-8), label, time, path: pagePath, title, device, action })),
+  const fallback = {
+    generatedAt: now,
+    activeCount: active.length,
+    active: active.map(v => ({
+      id: v.id.slice(-8), label: v.label, firstSeen: v.firstSeen, lastSeen: v.lastSeen,
+      path: v.path, title: v.title, device: v.device, deviceModel: v.deviceModel, browser: v.browser, os: v.os,
+      city: v.location?.city || '', region: v.location?.region || '', country: v.location?.country || '', countryCode: v.location?.countryCode || '',
+      location: makeLocationLabel(v.location || {}), locationSource: v.location?.source || '',
+      pageViews: 0, visitCount: 1, watching: v.path.startsWith('/watch/'),
+    })),
+    activity: recentVisitorActivity.slice(0, 120),
     popularPages: [...pages.values()].sort((a, b) => b.count - a.count).slice(0, 8),
-    devices: { mobile: active.filter(x => x.device === 'mobile').length, tablet: active.filter(x => x.device === 'tablet').length, desktop: active.filter(x => x.device === 'desktop').length },
-    retention: 'Live sessions expire after 75 seconds without a heartbeat. Recent activity is in memory and clears when the server restarts or sleeps.',
-  });
+    devices: { mobile: active.filter(v => v.device === 'mobile').length, tablet: active.filter(v => v.device === 'tablet').length, desktop: active.filter(v => v.device === 'desktop').length },
+    totalVisitors: liveVisitors.size,
+    totalPageViews: recentVisitorActivity.length,
+    returningVisitors: 0,
+    countries: [],
+    storage: visitorAnalytics.enabled ? 'unavailable' : 'memory',
+    storageWarning: visitorAnalytics.enabled ? 'PostgreSQL is configured but not reachable. Live data is temporary until the database reconnects.' : 'Persistent history is not enabled. Set DATABASE_URL in Render to retain visitor history after restarts.',
+    retention: 'Live sessions expire after 75 seconds. This server currently has only temporary history.',
+  };
+  try {
+    const snapshot = await visitorAnalytics.dashboardSnapshot(now, fallback);
+    res.json(snapshot);
+  } catch {
+    res.json(fallback);
+  }
+});
+
+app.get('/admin/visitors/history', requireAdmin, async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const query = String(req.query.q || '').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 100);
+  const offset = Math.max(0, Math.min(1_000_000, Number.parseInt(String(req.query.offset || '0'), 10) || 0));
+  const limit = Math.max(1, Math.min(100, Number.parseInt(String(req.query.limit || '50'), 10) || 50));
+  const memoryVisitors = [...liveVisitors.values()].map(v => ({
+    id: v.id.slice(-8), label: v.label, firstSeen: v.firstSeen, lastSeen: v.lastSeen, path: v.path, title: v.title,
+    device: v.device, deviceModel: v.deviceModel, browser: v.browser, os: v.os,
+    city: v.location?.city || '', region: v.location?.region || '', country: v.location?.country || '', countryCode: v.location?.countryCode || '',
+    location: makeLocationLabel(v.location || {}), locationSource: v.location?.source || '', pageViews: 0, visitCount: 1,
+    watching: v.path.startsWith('/watch/'),
+  }));
+  try {
+    const result = await visitorAnalytics.visitorHistory({ offset, limit, query }, memoryVisitors);
+    res.json(result);
+  } catch {
+    res.status(503).json({ error: 'Visitor history database is unavailable. Please check DATABASE_URL and the Render database status.' });
+  }
 });
 
 function requireToken() {
@@ -765,6 +832,8 @@ function defaultPageMetadata(pathname) {
     '/history': ['History | STREAM SUNAA', 'Recently opened titles in your STREAM SUNAA browsing history.', '/history', 'noindex,nofollow'],
     '/settings': ['Settings | STREAM SUNAA', 'Customize your STREAM SUNAA viewing, appearance and region preferences.', '/settings', 'noindex,nofollow'],
     '/about': ['About | STREAM SUNAA', 'Learn about STREAM SUNAA, its discovery interface and TMDB-powered catalogue data.', '/about', 'index,follow'],
+    '/features': ['Features | STREAM SUNAA', 'Explore STREAM SUNAA discovery, source selection, watch history, themes, subtitles and provider-dependent playback features.', '/features', 'index,follow'],
+    '/gitstore': ['GitStore · Project Source | STREAM SUNAA', 'Browse the STREAM SUNAA codebase and open its GitHub repository.', '/gitstore', 'index,follow'],
   };
   const value = entries[pathname] || ['Page Not Found | STREAM SUNAA', 'The requested STREAM SUNAA page could not be found.', pathname || '/', 'noindex,follow'];
   const safeTitle = seoText(value[0], 65);
@@ -807,7 +876,7 @@ app.get('/sitemap.xml', async (req, res) => {
   const origin = publicOrigin(req);
   let body = sitemapCache.origin === origin && sitemapCache.expiresAt > Date.now() ? sitemapCache.body : '';
   if (!body) {
-    const paths = ['/', '/browse', '/movies', '/tv', '/about'];
+    const paths = ['/', '/browse', '/movies', '/tv', '/about', '/features', '/gitstore'];
     if (TMDB_TOKEN) {
       try {
         // Several popular pages give the sitemap useful catalogue depth while
@@ -922,7 +991,7 @@ app.use(async (req, res) => {
   } else if (routePath.startsWith('/watch/')) {
     metadata.robots = 'noindex,follow';
   }
-  const knownStaticRoutes = new Set(['/', '/browse', '/movies', '/tv', '/search', '/my-list', '/history', '/settings', '/about']);
+  const knownStaticRoutes = new Set(['/', '/browse', '/movies', '/tv', '/search', '/my-list', '/history', '/settings', '/about', '/features', '/gitstore']);
   const isKnownDetailRoute = /^\/(?:details|watch)\/(?:movie|tv)\/\d+$/.test(routePath);
   const isKnownPersonRoute = /^\/person\/\d+$/.test(routePath);
   const isKnownRoute = knownStaticRoutes.has(routePath) || isKnownDetailRoute || isKnownPersonRoute;

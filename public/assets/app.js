@@ -1,6 +1,30 @@
 const app = document.querySelector('#app');
 const toastRoot = document.querySelector('#toast-root');
 
+// A short cinematic cold-open for the initial document load. It has a hard
+// failsafe so a slow API/network never traps the visitor behind the animation.
+const startupScreen = document.querySelector('#startup-screen');
+const startupStartedAt = performance.now();
+let startupExitScheduled = false;
+let startupScreenRemoved = false;
+function finishStartupScreen({ immediate = false } = {}) {
+  if (!startupScreen || startupExitScheduled || startupScreenRemoved) return;
+  startupExitScheduled = true;
+  clearTimeout(startupFailsafe);
+  const reducedMotion = immediate || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const elapsed = performance.now() - startupStartedAt;
+  const delay = reducedMotion ? 0 : Math.max(0, 1020 - elapsed);
+  window.setTimeout(() => {
+    if (startupScreenRemoved) return;
+    startupScreen.classList.add('is-leaving');
+    window.setTimeout(() => {
+      startupScreen?.remove();
+      startupScreenRemoved = true;
+    }, reducedMotion ? 0 : 610);
+  }, delay);
+}
+const startupFailsafe = window.setTimeout(() => finishStartupScreen({ immediate: true }), 4200);
+
 const SETTINGS_KEY = 'luma-settings';
 const DEFAULT_SERVER_ORDER = ['VidKing', 'VidSrc', 'CineSrc', 'FilmU', '2Embed', 'VidLink', 'VidRift', 'SuperEmbed', 'SmashyStream', 'VidEasy', 'VidSrc.cc', 'RiveStream', 'YapGrid', 'VidPlus', 'VidCore', 'VidZee', 'Frembed', 'PrimeWire Embed', 'P-Stream', 'VidSrc API', 'VidSrc TW', 'VidSrc Link', 'VidSrc Wiki'];
 const SOURCE_PREVIEW_LIMIT = 8;
@@ -120,11 +144,30 @@ function visitorDeviceClass() {
   if (/Mobi|Android|iPhone|iPod|IEMobile|Windows Phone/i.test(ua) || window.matchMedia?.('(pointer: coarse)').matches) return 'mobile';
   return 'desktop';
 }
-function sendAnonymousVisitorHeartbeat() {
+let visitorClientHintsPromise;
+function getVisitorClientHints() {
+  if (!visitorClientHintsPromise) {
+    visitorClientHintsPromise = (async () => {
+      const hints = navigator.userAgentData;
+      if (!hints?.getHighEntropyValues) return {};
+      try {
+        const values = await hints.getHighEntropyValues(['model', 'platform', 'platformVersion']);
+        return {
+          deviceModel: String(values.model || '').slice(0, 80),
+          platform: String(values.platform || '').slice(0, 50),
+        };
+      } catch { return {}; }
+    })();
+  }
+  return visitorClientHintsPromise;
+}
+async function sendAnonymousVisitorHeartbeat() {
   if (location.pathname.startsWith('/admin/')) return;
+  try { if (localStorage.getItem('sunaa-analytics-opt-out') === '1') return; } catch {}
   const heading = document.querySelector('.watch-title, .hero h1, .details-copy h1, .page-top .page-title, #main-content h1');
   const title = String(heading?.textContent || document.title || 'Browsing STREAM SUNAA').replace(/\s+/g, ' ').trim().slice(0, 120);
-  const payload = { id: anonymousVisitorId(), path: location.pathname, title, device: visitorDeviceClass() };
+  const hints = await getVisitorClientHints();
+  const payload = { id: anonymousVisitorId(), path: location.pathname, title, device: visitorDeviceClass(), ...hints };
   fetch('/api/analytics/heartbeat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -658,11 +701,11 @@ function footer() {
           <a href="mailto:contact.sunaa@gmail.com" aria-label="Email contact.sunaa@gmail.com">${iconWrap('mail')}<span>contact.sunaa@gmail.com</span></a>
         </div>
       </div>
-      <div class="footer-column"><span class="footer-label">Explore</span><a href="/movies" data-link>Movies</a><a href="/tv" data-link>Series</a><button type="button" class="footer-search-action" data-open-global-search>Search</button></div>
-      <div class="footer-column"><span class="footer-label">Library</span><a href="/my-list" data-link>My List</a><a href="/history" data-link>History</a><a href="/about" data-link>About</a></div>
+      <div class="footer-column"><span class="footer-label">Explore</span><a href="/movies" data-link>Movies</a><a href="/tv" data-link>Series</a><a href="/features" data-link>Features</a><button type="button" class="footer-search-action" data-open-global-search>Search</button></div>
+      <div class="footer-column"><span class="footer-label">Library</span><a href="/my-list" data-link>My List</a><a href="/history" data-link>History</a><a href="/about" data-link>About</a><a href="/gitstore" data-link>GitStore</a></div>
       <div class="footer-note"><span class="footer-label">Data & credits</span><p>STREAM SUNAA uses the <a href="https://www.themoviedb.org/" target="_blank" rel="noreferrer">TMDB API</a> for metadata, artwork and provider data. STREAM SUNAA is not endorsed or certified by TMDB.</p></div>
     </div>
-    <div class="footer-bottom"><span>© ${new Date().getFullYear()} STREAM SUNAA</span><span>Built for discovery</span><button class="footer-top" data-top>Back to top ${iconWrap('arrowUp')}</button></div>
+    <div class="footer-bottom"><span>© ${new Date().getFullYear()} STREAM SUNAA</span><a href="/privacy.html">Privacy & analytics</a><span>Built for discovery</span><button class="footer-top" data-top>Back to top ${iconWrap('arrowUp')}</button></div>
   </footer>`;
 }
 
@@ -1945,6 +1988,61 @@ function bindServerDrag() {
 function renderAbout() {
   app.innerHTML = `${nav()}<main id="main-content" tabindex="-1" class="page-shell page"><div class="page-top"><div><span class="eyebrow">Inside STREAM SUNAA</span><h1 class="page-title">About</h1><p class="page-intro">A focused catalogue experience for discovery, local lists and a provider-agnostic watch layer.</p></div></div><div class="about-grid"><div class="info-panel"><div class="panel-head"><div><span class="panel-kicker">Interface</span><h3>Cinematic by default</h3></div>${iconWrap('layers')}</div><p>Large artwork, compact metadata, fast catalogue browsing and a simple player flow keep the interface focused on finding something worth watching.</p></div><div class="info-panel"><div class="panel-head"><div><span class="panel-kicker">Data</span><h3>TMDB powered</h3></div>${iconWrap('globe')}</div><p>This product uses the TMDB API for metadata and imagery but is not endorsed or certified by TMDB.</p></div></div>${footer()}</main>`;
 }
+function renderFeatures() {
+  const featureCards = [
+    { n:'01', icon:'search', title:'Search with intent', desc:'Search for movies, television series and cast or crew. Open title pages with artwork, synopsis, ratings, release details and recommendations.', tags:['Movies & series','People search','Recommendations'] },
+    { n:'02', icon:'grid', title:'Filter the catalogue', desc:'Sort movies and series and narrow results by genre, year, rating, vote count and streaming-provider availability for your selected region.', tags:['Genre & year','Ratings','Provider discovery'] },
+    { n:'03', icon:'server', title:'Choose a playback source', desc:'Switch between configured third-party embedded players and arrange your preferred source order in Settings. The options list can expand when more sources are available.', tags:['Multiple sources','Custom order','Provider-dependent'] },
+    { n:'04', icon:'subtitles', title:'Subtitles & audio languages', desc:'When the selected embedded player offers them, use its own CC/subtitle and audio menus to choose available captions, dubbing or audio tracks. Options vary by title and source.', tags:['CC / subtitles','Alternate audio','When supplied by source'], wide:true },
+    { n:'05', icon:'clock', title:'Pick up where you left off', desc:'Continue Watching can remember a series episode and resume timestamp when the active provider reports playback progress. Resume support differs across providers.', tags:['Episode memory','Resume timestamp','Supported players'] },
+    { n:'06', icon:'tv', title:'Season and episode navigation', desc:'Browse available seasons and episodes, jump to another episode, and let compatible embedded players handle next-episode behavior where supported.', tags:['Season picker','Episode list','Provider-controlled autoplay'] },
+    { n:'07', icon:'download', title:'Download choices, clearly separated', desc:'The download picker can list configured local files and verified direct-file sources. External options such as AllFlix and VidVault open their own sites; availability and quality are not guaranteed.', tags:['Quality picker','Direct files when configured','External provider pages'] },
+    { n:'08', icon:'list', title:'A personal shelf on this device', desc:'Save titles to My List and revisit recently opened titles in History. These lists are stored in this browser, so they are not automatically synced across devices.', tags:['My List','History','Local storage'] },
+    { n:'09', icon:'palette', title:'Make the interface yours', desc:'Adjust dark/light/system theme, accent colours, animated gradient palette, region, detail-page style, spoiler-free episode labels, autoplay preference and reduced motion.', tags:['Theme & accents','Region setting','Motion controls'] },
+    { n:'10', icon:'users', title:'Know the story before you press play', desc:'Explore cast and crew, biographies, filmographies, genres, trailers when available, ratings and related titles—then check regional viewing options.', tags:['Cast & crew','Trailers when available','Where to watch'] },
+  ];
+  app.innerHTML = `${nav()}<main id="main-content" tabindex="-1" class="page-shell page features-page">
+    <section class="features-hero"><div class="features-hero-copy"><span class="eyebrow">The SUNAA toolkit / 01—10</span><h1>More than a poster.<br><span>A better way to choose.</span></h1><p class="page-intro">Discovery, source choice and a personal watch flow, all shaped around the next thing you want to watch—not a maze of menus.</p><div class="features-hero-actions"><a class="btn primary" href="/browse" data-link>${iconWrap('search')} Explore the catalogue</a><a class="btn secondary" href="/settings" data-link>${iconWrap('settings')} Tune your setup</a></div></div>
+      <div class="features-console" aria-label="STREAM SUNAA interface preview"><div class="features-console-head"><span class="features-console-dots"><i></i><i></i><i></i></span><span>SUNAA / EXPERIENCE MAP</span><span class="features-console-state">READY</span></div><div class="features-console-art" aria-hidden="true"></div><div class="features-console-foot"><span>FRAME 01 — DISCOVERY</span><strong>MAKE IT A GOOD ONE</strong></div></div>
+    </section>
+    <div class="features-section-intro"><div><span class="eyebrow">Built into the experience</span><h2>Every part has a purpose.</h2></div><p>These are the features that exist in the current website, with provider-dependent behavior called out instead of overpromised.</p></div>
+    <section class="features-grid" aria-label="STREAM SUNAA features">${featureCards.map((item, index) => `<article class="feature-card ${item.wide ? 'feature-card-wide feature-card-spotlight' : ''}"><div class="feature-card-main"><div class="feature-card-top"><span class="feature-card-index">FEATURE / ${item.n}</span><span class="feature-card-icon">${iconWrap(item.icon)}</span></div><h3>${item.title}</h3><p>${item.desc}</p><div class="feature-card-tags">${item.tags.map(tag => `<span>${tag}</span>`).join('')}</div></div>${item.wide ? '<div class="feature-card-art" aria-hidden="true"></div>' : ''}</article>`).join('')}</section>
+    <p class="features-footnote"><strong>One important distinction:</strong> STREAM SUNAA is a discovery interface and launcher for embedded third-party players; it does not own or control every stream. Subtitle availability, languages, player controls, playback stability and next-episode behavior depend on the selected provider and title. Regional provider listings come from third-party catalogue data and may not reflect every plan or real-time change.</p>
+    <section class="features-bottom-cta"><div><span class="eyebrow">Ready when you are</span><h2>Find the next thing worth your time.</h2><p>Jump into the catalogue or fine-tune the way SUNAA feels.</p></div><a class="btn primary" href="/browse" data-link>Start exploring ${iconWrap('arrowUp')}</a></section>
+    ${footer()}</main>`;
+}
+function renderGitStore() {
+  const repo = 'https://github.com/iamyuvraj0/LUMA-STREAM';
+  const clone = 'git clone https://github.com/iamyuvraj0/LUMA-STREAM.git';
+  const sourceFiles = [
+    {icon:'server', name:'Application server', path:'server.js', desc:'API routes, title metadata, provider source configuration and delivery logic.'},
+    {icon:'palette', name:'Frontend experience', path:'public/assets/app.js + styles.css', desc:'The SPA interface, responsive layouts, interactions, playback selection and feature pages.'},
+    {icon:'layers', name:'Provider catalogue', path:'data/embed-providers.json', desc:'Configured embedded-player templates, kept separate from the UI code.'},
+    {icon:'clock', name:'Analytics & privacy', path:'lib/visitor-analytics.js', desc:'Anonymous visitor analytics and approximate location handling, subject to deployment configuration.'},
+    {icon:'download', name:'Download pipeline', path:'lib/provider-downloads.js', desc:'Validated direct-file download options, range support and external provider-page links.'},
+    {icon:'check', name:'Automated tests', path:'test/', desc:'Regression checks for provider navigation, downloads, privacy hardening and analytics behavior.'},
+  ];
+  app.innerHTML = `${nav()}<main id="main-content" tabindex="-1" class="page-shell page gitstore-page">
+    <section class="gitstore-hero"><div><span class="eyebrow">GitStore / project source</span><h1>The work behind<br><span>the watch experience.</span></h1><p>GitStore is the source hub for STREAM SUNAA: a clear route to the project repository, a clone command for developers and a map of the main code areas.</p><div class="gitstore-actions"><a class="btn primary" href="${repo}" target="_blank" rel="noopener noreferrer">${iconWrap('github')} Open repository ${iconWrap('external')}</a><a class="btn secondary" href="${repo}/archive/refs/heads/main.zip" target="_blank" rel="noopener noreferrer">${iconWrap('download')} Get source ZIP</a></div></div>
+      <aside class="gitstore-repo-card" aria-label="Repository details"><div class="gitstore-repo-head"><span class="gitstore-glyph">${iconWrap('github')}</span><div class="gitstore-repo-name"><strong>iamyuvraj0 / LUMA-STREAM</strong><small>STREAM SUNAA website repository</small></div><span class="gitstore-chip">main</span></div><div class="gitstore-clone"><span class="gitstore-clone-label">Clone over HTTPS</span><code>${clone}</code></div><button class="btn secondary" type="button" style="width:100%;margin-top:10px;justify-content:center" data-copy-clone>${iconWrap('list')} Copy clone command</button><div class="gitstore-stats"><div class="gitstore-stat"><strong>Node.js</strong><span>Server runtime</span></div><div class="gitstore-stat"><strong>Express</strong><span>HTTP app</span></div><div class="gitstore-stat"><strong>Vanilla JS</strong><span>Frontend</span></div></div></aside>
+    </section>
+    <section class="gitstore-section"><span class="eyebrow">Repository map</span><h2>Find your way around the code.</h2><div class="gitstore-file-grid">${sourceFiles.map(file => `<article class="gitstore-file"><span class="feature-card-icon">${iconWrap(file.icon)}</span><h3>${file.name}</h3><p><code>${file.path}</code><br>${file.desc}</p></article>`).join('')}</div><p class="gitstore-note">The repository is the source of truth. The “Get source ZIP” link downloads the current <code>main</code> branch from GitHub; release status, latest commit and contribution counts are deliberately not fabricated here.</p></section>
+    ${footer()}</main>`;
+  document.querySelector('[data-copy-clone]')?.addEventListener('click', async () => {
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+      await navigator.clipboard.writeText(clone);
+      showToast('Clone command copied');
+    } catch {
+      showToast('Select the command above and copy it manually');
+      const command = document.querySelector('.gitstore-clone code');
+      if (command && window.getSelection) {
+        const range = document.createRange(); range.selectNodeContents(command);
+        const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range);
+      }
+    }
+  });
+}
 function renderError(message) { app.innerHTML = `${nav()}<main id="main-content" tabindex="-1" class="page-shell page"><div class="empty"><div>${iconWrap('info')}</div><div>${escapeHtml(message)}</div><a class="btn secondary" href="/" data-link>Return home</a></div>${footer()}</main>`; }
 function navigate(url) {
   history.pushState({}, '', url);
@@ -1984,6 +2082,8 @@ async function router() {
     '/history': { title: 'History', description: 'Recently opened titles in your STREAM SUNAA browsing history.', robots: 'noindex,nofollow' },
     '/settings': { title: 'Settings', description: 'Customize your STREAM SUNAA viewing, appearance and region preferences.', robots: 'noindex,nofollow' },
     '/about': { title: 'About STREAM SUNAA', description: 'Learn about STREAM SUNAA and its TMDB-powered discovery catalogue.' },
+    '/features': { title: 'Features', description: 'Explore STREAM SUNAA discovery, source selection, watch history, themes, subtitles and provider-dependent playback features.' },
+    '/gitstore': { title: 'GitStore · Project Source', description: 'Browse the STREAM SUNAA codebase and open its GitHub repository.' },
   };
   const safeMeta = staticMeta[route] || (parts[0] === 'person' ? { title: 'Cast & Crew Profile', description: 'Explore filmographies and screen credits on STREAM SUNAA.' } : parts[0] === 'details' ? { title: 'Title Details', description: 'Explore movie and television details on STREAM SUNAA.' } : parts[0] === 'watch' ? { title: 'Watch', description: 'Viewing options and episode navigation on STREAM SUNAA.', robots: 'noindex,follow' } : { title: 'Page Not Found', description: 'The requested STREAM SUNAA page could not be found.', robots: 'noindex,follow' });
   const isWatch = parts[0] === 'watch' && parts.length >= 3;
@@ -1998,6 +2098,8 @@ async function router() {
   if (parts[0] === 'history') return renderSavedPage('history');
   if (parts[0] === 'settings') return renderSettings();
   if (parts[0] === 'about') return renderAbout();
+  if (parts[0] === 'features') return renderFeatures();
+  if (parts[0] === 'gitstore') return renderGitStore();
   if (parts[0] === 'details' && parts.length >= 3) return renderDetails(parts[1], Number(parts[2]));
   if (parts[0] === 'watch' && parts.length >= 3) return renderWatch(parts[1], Number(parts[2]));
   renderError('Page not found.');
@@ -2229,7 +2331,8 @@ async function bootApp() {
     }
   } catch { /* Keep the safe local default if configuration is unavailable. */ }
   applySettings();
-  router();
+  await router();
+  finishStartupScreen({ immediate: Boolean(state.settings.reduceMotion) });
 }
 bootApp();
 startAnonymousVisitorTracking();

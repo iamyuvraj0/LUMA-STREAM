@@ -1,6 +1,12 @@
-# LUMA
+# STREAM SUNAA
 
 Updated from the latest smooth build.
+
+## Startup, features and source hub
+- A short projector-iris startup sequence runs only on initial document load, respects reduced-motion preferences, and has a hard failsafe so slow catalogue APIs cannot leave it stuck.
+- `/features` documents the current discovery, browsing, source selection, episode navigation, personal library, downloads and customization capabilities. Subtitle/audio controls are explicitly described as dependent on the chosen third-party embedded player and its available tracks.
+- `/gitstore` links the project GitHub repository, source ZIP and HTTPS clone command, and maps the key application directories. It does not fabricate live repository activity, counts or release status.
+- See `STARTUP-FEATURES-GITSTORE-CHANGELOG.md` for implementation notes and verification results.
 
 ## This pass
 - Hover-only card metadata overlay on desktop, touch-friendly overlay on mobile.
@@ -107,3 +113,25 @@ For production, set a real `PUBLIC_SITE_URL`, use HTTPS at the edge, protect `.e
 `data/embed-providers.json` is shipped pre-populated with the requested additional movie and TV embed templates. No copy or setup step is needed. The watch page loads this file by default, displays the configured sources in the watch player, and the Settings → Server Order screen lets users change their order.
 
 Supported placeholders are `{id}` for the numeric TMDB ID, `{imdb}` for a TMDB-supplied IMDb ID, and `{season}` / `{episode}` for TV episodes. Only HTTPS templates are accepted. A source may still fail because a host is offline, blocks iframe embedding, lacks a title, or changes its URL format; LUMA marks these hosts as unverified because it cannot reliably inspect errors inside cross-origin players. Edit `data/embed-providers.json` to disable a provider or correct an endpoint.
+
+
+## Private visitor analytics dashboard
+
+The private dashboard is available at `https://YOUR-DOMAIN/admin/visitors`. It uses HTTP Basic Authentication. Set these variables in Render, never in a committed `.env` file:
+
+```env
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=choose-a-unique-random-password-at-least-12-characters-long
+DATABASE_URL=postgresql://USER:PASSWORD@HOST/DB?sslmode=require
+VISITOR_GEOLOCATION=true
+```
+
+Set `DATABASE_URL` to a persistent PostgreSQL database (a Neon pooled connection string is a good free-tier option; see https://neon.com/). On the first analytics request, the server creates its `sunaa_visitor_sessions` and `sunaa_visitor_events` tables automatically. No manual SQL migration is needed. Render Free Postgres is convenient for testing, but Render documents that its free database expires 30 days after creation, so don't use it for history you need to keep unless you upgrade it. See https://render.com/docs/free.
+
+Tracking uses a random browser ID stored in local storage; no visitor login is required. The service saves internal page path/title, a coarse device class, a model hint if the browser exposes one, a derived browser/OS label, and city/region/country estimated from the connection IP. The raw IP and complete user-agent string are not written to the analytics tables. For geolocation, the server transiently sends the public IP to `https://ipwho.is/`; the provider receives that lookup IP and has its own terms/privacy policy. The no-key endpoint is rate-limited (currently documented as 1,000 lookups/day per caller), and location may be missing or inaccurate because of VPNs, proxies, mobile networks or shared IPs. Set `VISITOR_GEOLOCATION=false` to disable external location lookups. The public `/privacy.html` page explains tracking and lets a visitor opt out in that browser.
+
+Device-model accuracy depends on browser APIs: some Android/Chromium browsers expose a model string (sometimes a code, not the retail name); iPhone/iPad and desktop browsers generally hide the exact hardware model. The dashboard does not request GPS permissions, store GPS coordinates, retain raw IP addresses/full user-agent strings, or prove that a cross-origin video is actually playing. Live presence expires after 75 seconds without a heartbeat. Historical sessions and activity persist in PostgreSQL across restarts and sleeps; if `DATABASE_URL` is missing/unreachable, the UI warns that only temporary live data is available.
+
+## Continue watching resume positions
+
+Playback timestamps are stored in the browser's local watch history for providers that expose documented playback events. VidKing and the supported VidSrc embeds can report positions; resume parameters are sent when those sources support them. Other cross-origin embed providers may not expose playback time, and the site cannot safely inspect a third-party iframe's private player state. The Continue Watching card shows the last saved timestamp when one is available.

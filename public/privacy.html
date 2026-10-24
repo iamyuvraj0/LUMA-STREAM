@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="index,follow"><meta name="theme-color" content="#0a100e">
+  <title>Privacy & Analytics · STREAM SUNAA</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/assets/privacy.css"><script defer src="/assets/privacy.js"></script>
+</head>
+<body>
+  <main class="privacy-shell">
+    <a class="brand" href="/"><span class="mark">S</span><span><strong>STREAM SUNAA</strong><small>PRIVACY NOTES</small></span></a>
+    <p class="eyebrow">TRANSPARENCY FIRST</p><h1>Privacy & <em>analytics.</em></h1>
+    <p class="lead">STREAM SUNAA uses privacy-minimised analytics to understand how the site is used and to improve the browsing experience. Visitors do not need an account.</p>
+    <section><h2>What analytics records</h2><p>A random browser ID stored in local storage; internal page path and page title; a broad device class; and, when the browser exposes it, a device model hint. The server also derives a browser and operating-system label from the request's user-agent header, but does not store the full header string.</p></section>
+    <section><h2>Approximate location</h2><p>The server uses the visitor's public IP address transiently to request an approximate city, region and country from <a href="https://ipwho.is/" rel="noopener noreferrer" target="_blank">IPWho.is</a>. The raw IP address is not written to the visitor analytics database. The geolocation provider receives the queried IP address and may process it under its own terms and privacy policy. IP-based locations can be wrong, especially for VPNs, proxies, mobile networks and shared connections.</p></section>
+    <section><h2>What we do not collect</h2><p>The analytics dashboard does not request GPS coordinates, camera or microphone access, real names, account credentials, or the contents of a visitor's device. The dashboard cannot prove that a third-party embedded player is actively playing video; it records the page the browser is visiting.</p></section>
+    <section><h2>Retention and controls</h2><p>Visitor history is stored in the site's configured PostgreSQL database until the site operator removes it. A browser ID can be removed by clearing this site's local storage, which will cause the site to issue a new anonymous ID on a later visit. You can also opt this browser out below. Analytics may be unavailable if the site's database or geolocation lookup is offline.</p><div class="analytics-control"><span id="analytics-state" role="status">Checking this browser’s setting…</span><button id="analytics-toggle" type="button">Manage analytics</button></div></section>
+    <section><h2>Questions</h2><p>For questions about STREAM SUNAA, email <a href="mailto:contact.sunaa@gmail.com">contact.sunaa@gmail.com</a>.</p></section>
+    <footer><a href="/">← Back to STREAM SUNAA</a><span>Updated October 23, 2026</span></footer>
+  </main>
+</body>
+</html>
