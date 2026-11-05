@@ -8,15 +8,15 @@ const css = await readFile(new URL('../public/assets/styles.css', import.meta.ur
 const server = await readFile(new URL('../server.js', import.meta.url), 'utf8');
 const readme = await readFile(new URL('../README.md', import.meta.url), 'utf8');
 
-test('startup screen uses a custom projector iris sequence and is accessible', () => {
+test('startup screen uses a minimal branded loading animation and is accessible', () => {
   assert.match(html, /id="startup-screen" class="startup-screen" role="status"/);
-  assert.match(html, /startup-aperture/);
-  assert.match(css, /@keyframes startup-lens-open/);
+  assert.match(html, /startup-brand-mark/);
+  assert.match(css, /@keyframes startup-minimal-load/);
   assert.match(css, /startup-screen\.is-leaving/);
   assert.match(css, /@media\(prefers-reduced-motion:reduce\)\{\.startup-screen\{display:none!important\}/);
   assert.match(app, /function finishStartupScreen\([\s\S]*?startupFailsafe/);
   assert.match(app, /setTimeout\(\(\) => finishStartupScreen\(\{ immediate: true \}\), 4200\)/);
-  assert.match(html, /v=20261024-startup-features-gitstore/);
+  assert.match(html, /v=20261026-artwork-atmosphere-orange/);
 });
 
 test('features page covers implemented functionality and avoids overpromising subtitles or audio tracks', () => {

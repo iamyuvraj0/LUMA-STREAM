@@ -2845,3 +2845,850 @@ body {
 @media(max-width:900px){.features-hero{grid-template-columns:minmax(0,1fr) minmax(220px,.7fr);gap:26px}.features-console{padding:13px}.features-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.feature-card.feature-card-wide{grid-column:span 2}.gitstore-hero{grid-template-columns:1fr}.gitstore-repo-card{max-width:620px;width:100%}.gitstore-file-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:680px){.features-page,.gitstore-page{padding-top:84px}.features-hero{grid-template-columns:1fr;gap:26px;padding:24px 20px;border-radius:22px;min-height:0}.features-hero h1{font-size:clamp(38px,10vw,59px)}.features-console{justify-self:stretch;width:100%;max-width:none;transform:none}.features-console-art{aspect-ratio:2.1}.features-section-intro{display:block;margin-top:34px}.features-section-intro p{margin-top:10px}.features-grid{grid-template-columns:1fr;gap:10px}.feature-card,.feature-card.feature-card-wide{grid-column:auto;min-height:0;display:flex;padding:21px}.feature-card-top{margin-bottom:17px}.feature-card-art{width:100%;min-height:115px;margin-top:16px}.features-footnote{padding:15px}.features-bottom-cta{align-items:flex-start;flex-direction:column;border-radius:17px}.gitstore-hero{padding:24px 20px;border-radius:22px;gap:23px}.gitstore-hero h1{font-size:clamp(38px,10vw,58px)}.gitstore-repo-card{padding:14px}.gitstore-file-grid{grid-template-columns:1fr}.gitstore-file{padding:18px}.gitstore-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.features-bottom-cta .btn{width:100%;justify-content:center}}
 @media(prefers-reduced-motion:reduce){.features-console-art::before,.feature-card,.gitstore-hero *{animation:none!important;transition:none!important;transform:none!important}}
+
+/* STREAM SUNAA visual refinement · 2026-10-26 */
+:root {
+  --accent: #ff7a1a;
+  --accent-2: #ffb15c;
+  --accent-ink: #1a0d03;
+  --accent-soft: rgba(255,122,26,.14);
+  --accent-glow: rgba(255,122,26,.24);
+}
+
+/* The page atmosphere sits behind every route. Only the image itself blurs;
+   dark overlays keep poster colour while maintaining readable foregrounds. */
+html, body { background: var(--bg); }
+body { isolation: isolate; }
+#page-atmosphere {
+  position: fixed;
+  z-index: 0;
+  inset: -34px;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  background: var(--bg);
+  transition: opacity .65s cubic-bezier(.2,.8,.2,1);
+  contain: paint;
+}
+#page-atmosphere img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  opacity: 0;
+  filter: blur(28px) saturate(1.16);
+  transform: scale(1.12);
+  transition: opacity .65s ease, filter .65s ease;
+}
+#page-atmosphere::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(5,6,9,.68), rgba(5,6,9,.79) 34%, rgba(5,6,9,.88) 68%, rgba(5,6,9,.94));
+}
+#page-atmosphere::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  background: radial-gradient(ellipse at 52% 13%, rgba(255,122,26,.075), transparent 52%);
+}
+#page-atmosphere.has-artwork { opacity: 1; }
+#page-atmosphere.has-artwork img { opacity: .46; }
+#page-atmosphere.is-watch-background img { opacity: .52; filter: blur(30px) saturate(1.2); }
+html[data-background-mode="gradient"] #page-atmosphere { opacity: 0 !important; }
+html[data-theme="light"] #page-atmosphere::before {
+  background: linear-gradient(180deg, rgba(244,242,238,.72), rgba(244,242,238,.82) 38%, rgba(244,242,238,.91) 70%, rgba(244,242,238,.96));
+}
+#app { position: relative; z-index: 1; background: transparent; }
+#toast-root { position: relative; z-index: 300; }
+
+/* Make the hero dissolve into the ambient artwork instead of ending at a hard edge. */
+.hero { margin-bottom: -72px; padding-bottom: clamp(150px, 21vh, 220px); }
+.hero::after {
+  z-index: 1;
+  height: clamp(210px, 29vw, 390px);
+  background: linear-gradient(180deg, transparent 0%, rgba(5,6,8,.20) 28%, rgba(5,6,8,.43) 56%, rgba(5,6,8,.66) 82%, rgba(5,6,8,.78) 100%);
+}
+.continue-watching-section, .provider-section, .section { position: relative; background: transparent; }
+.continue-watching-section { z-index: 2; }
+
+/* The brand is only as wide as its visible wordmark. Empty header space is inert. */
+.site-header { pointer-events: none !important; }
+.site-header .header-inner { pointer-events: none !important; grid-template-columns: minmax(0,1fr) auto !important; }
+.site-header .brand { justify-self: start !important; width: fit-content !important; max-width: 100%; pointer-events: auto !important; }
+.site-header .header-actions, .site-header .header-actions > * { pointer-events: auto !important; }
+.site-header .header-icon,
+.site-header .header-icon:hover,
+.bottom-nav-link,
+.bottom-nav-link:hover,
+.nav-link,
+.nav-link:hover,
+.btn.secondary,
+.btn.ghost,
+.btn.icon-only,
+.rail-btn,
+.rail-btn:hover:not(:disabled),
+.season-tab,
+.season-picker-btn,
+.episode-pill,
+.source-pill,
+.server-move,
+.global-search-close {
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+.site-header .header-icon { border-color: transparent !important; border-radius: 50% !important; }
+.site-header .header-icon:hover, .site-header .header-icon.active { color: var(--accent) !important; }
+.bottom-liquid-nav { isolation: isolate; }
+.bottom-nav-link.active { color: var(--accent) !important; }
+.bottom-nav-link.active .icon { color: var(--accent) !important; }
+.btn.primary { background: var(--accent) !important; color: #1a0d03 !important; border-color: transparent !important; box-shadow: 0 9px 24px -16px var(--accent-glow) !important; }
+.btn.primary:hover { background: color-mix(in srgb, var(--accent) 88%, white) !important; box-shadow: 0 12px 30px -18px var(--accent-glow) !important; }
+.btn.secondary:hover, .btn.ghost:hover, .btn.icon-only:hover, .rail-btn:hover:not(:disabled) { color: var(--accent) !important; }
+:where(button, .btn, a):focus-visible { outline-color: var(--accent) !important; }
+
+/* The accent is a functional state cue, not just a palette swatch. */
+.watch-episode.active,
+.watch-episode[aria-current="true"] {
+  border-color: color-mix(in srgb, var(--accent) 76%, transparent) !important;
+  box-shadow: inset 3px 0 0 var(--accent), 0 10px 25px -21px var(--accent-glow) !important;
+}
+.watch-episode.active .watch-episode-play,
+.watch-episode[aria-current="true"] .watch-episode-play,
+.watch-episode.active .watch-episode-copy strong { color: var(--accent) !important; }
+.watch-episode.active::before, .watch-episode[aria-current="true"]::before { background: var(--accent) !important; }
+.movie-card:hover .poster-wrap::after { opacity: .54 !important; filter: blur(19px) !important; background: var(--accent-glow) !important; }
+.movie-card:hover .poster-wrap { box-shadow: 0 28px 42px -29px rgba(0,0,0,.88), 0 20px 38px -26px var(--accent-glow) !important; }
+
+/* Make provider discovery visibly populated even when upstream logos fail. */
+.provider-section .provider-row {
+  grid-auto-columns: clamp(150px, 15vw, 205px) !important;
+  align-items: stretch !important;
+  min-height: 132px !important;
+  gap: 14px !important;
+}
+.provider-section .provider-tile,
+.provider-section .provider-tile:hover,
+.provider-section .provider-tile:focus-visible {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 9px !important;
+  width: 100% !important;
+  min-height: 124px !important;
+  aspect-ratio: auto !important;
+  padding: 14px 12px !important;
+  overflow: hidden !important;
+  border: 1px solid color-mix(in srgb, var(--text) 10%, transparent) !important;
+  border-radius: 18px !important;
+  color: var(--text) !important;
+  background: color-mix(in srgb, var(--surface-solid) 78%, transparent) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,.13) !important;
+  text-decoration: none !important;
+}
+.provider-section .provider-tile:hover,
+.provider-section .provider-tile:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 42%, transparent) !important;
+  box-shadow: 0 13px 30px -22px var(--accent-glow) !important;
+  transform: translateY(-3px) !important;
+}
+.provider-section .provider-logo-frame {
+  display: grid !important;
+  place-items: center !important;
+  width: 100% !important;
+  height: 54px !important;
+  flex: 0 0 54px !important;
+  min-height: 0 !important;
+}
+.provider-section .provider-logo-frame img {
+  width: auto !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: 48px !important;
+  object-fit: contain !important;
+}
+.provider-section .provider-title,
+.provider-section .provider-tile > strong {
+  position: static !important;
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  clip: auto !important;
+  white-space: normal !important;
+  border: 0 !important;
+  color: var(--muted) !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  text-align: center !important;
+  text-overflow: clip !important;
+}
+.provider-section .provider-initials,
+.provider-section .provider-logo-fallback.visible:not([hidden]) {
+  display: grid !important;
+  place-items: center !important;
+  width: auto !important;
+  height: 48px !important;
+  padding: 0 4px !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  font-size: 18px !important;
+  font-weight: 850 !important;
+  letter-spacing: -.04em !important;
+  text-align: center !important;
+}
+
+/* Dark, more deeply blurred suggestion/dropdown surfaces only. */
+.global-search-panel .search-results,
+.search-results.global-search-results,
+.filter-menu,
+.setting-menu,
+.season-picker-menu {
+  background: rgba(9,10,13,.91) !important;
+  border: 1px solid rgba(255,255,255,.105) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.18) !important;
+  backdrop-filter: blur(18px) saturate(1.18) !important;
+  box-shadow: 0 22px 60px rgba(0,0,0,.48) !important;
+}
+.global-search-item { background: transparent !important; }
+.global-search-item:hover, .global-search-item:focus-visible { background: rgba(255,255,255,.075) !important; }
+
+/* Minimal premium startup: no artificial grain, orbit clutter or oversized lens. */
+.startup-screen {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 10000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 22px !important;
+  padding: 24px !important;
+  background: #08090b !important;
+  color: #f7f5f1 !important;
+  opacity: 1;
+  filter: none;
+  transition: opacity .36s ease !important;
+}
+.startup-screen::before { background: radial-gradient(ellipse at 50% 54%, rgba(255,122,26,.07), transparent 40%), #08090b !important; }
+.startup-screen::after { display: none !important; }
+.startup-screen .startup-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--accent, #ff7a1a);
+  color: #1a0d03;
+  font: 800 23px/1 'Space Grotesk', sans-serif;
+  box-shadow: 0 0 38px rgba(255,122,26,.13);
+  animation: startup-mark-in .72s cubic-bezier(.2,.8,.2,1) both;
+}
+.startup-screen .startup-stage { display: flex !important; flex-direction: row; align-items: center; justify-content: center; gap: 18px !important; width: auto !important; padding: 0 !important; }
+.startup-screen .startup-copy { text-align: left !important; min-width: 0; opacity: 0; transform: translateY(7px); animation: startup-minimal-copy .56s .12s ease-out forwards; }
+.startup-screen .startup-copy h1 { margin: 0 0 7px !important; color: #f7f5f1 !important; font: 700 clamp(20px,3vw,27px)/1 'Space Grotesk', sans-serif !important; letter-spacing: -.065em !important; white-space: nowrap; }
+.startup-screen .startup-copy h1 strong { color: var(--accent, #ff7a1a) !important; }
+.startup-screen .startup-copy h1 span { color: var(--accent, #ff7a1a) !important; }
+.startup-screen .startup-copy p { margin: 0 !important; color: rgba(247,245,241,.48) !important; font-size: 10px !important; }
+.startup-screen .startup-meter { width: 190px !important; max-width: 100%; height: 2px !important; margin: 17px 0 0 !important; overflow: hidden; background: rgba(255,255,255,.10) !important; }
+.startup-screen .startup-meter span { width: 35% !important; height: 100%; border-radius: 999px; background: var(--accent, #ff7a1a) !important; box-shadow: 0 0 14px rgba(255,122,26,.28) !important; transform: translateX(-110%); animation: startup-minimal-load 1.05s .1s cubic-bezier(.2,.75,.25,1) infinite !important; }
+.startup-screen.is-leaving { opacity: 0 !important; filter: none !important; pointer-events: none; }
+@keyframes startup-mark-in { from { opacity: 0; transform: scale(.88); } to { opacity: 1; transform: scale(1); } }
+@keyframes startup-minimal-copy { to { opacity: 1; transform: translateY(0); } }
+@keyframes startup-minimal-load { 0% { transform: translateX(-115%); } 100% { transform: translateX(325%); } }
+@media (max-width: 480px) {
+  .startup-screen .startup-stage { flex-direction: column !important; gap: 14px !important; }
+  .startup-screen .startup-copy { text-align: center !important; }
+  .startup-screen .startup-meter { margin-inline: auto !important; }
+  .provider-section .provider-row { grid-auto-columns: 140px !important; }
+  .provider-section .provider-tile { min-height: 112px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #page-atmosphere, #page-atmosphere img { transition: none !important; }
+  .startup-screen .startup-brand-mark, .startup-screen .startup-copy, .startup-screen .startup-meter span { animation: none !important; }
+  .startup-screen .startup-copy { opacity: 1 !important; transform: none !important; }
+}
+
+/* Most controls should read as type and icon, not as a stack of pills. Keep the
+   primary CTA and the deliberate menu/card surfaces as the exceptions. */
+:is(.setting-select, .filter-select, .theme-menu-trigger, .setting-menu-trigger,
+.filter-menu-trigger, .season-picker-btn, .modal-close, .source-more-pill,
+.server-move, .global-search-close, .btn.secondary, .btn.ghost, .btn.icon-only,
+.rail-btn, .header-icon, .nav-link, .bottom-nav-link, .season-tab, .episode-pill,
+.source-pill) {
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+.btn:not(.primary) { background: transparent !important; background-image: none !important; box-shadow: none !important; }
+.setting-select:hover, .filter-select:hover, .season-picker-btn:hover,
+.global-search-close:hover, .modal-close:hover { color: var(--accent) !important; }
+
+/* STREAM SUNAA: continuous artwork atmosphere + final interaction corrections. */
+:root {
+  --atmosphere-blur: 22px;
+  --atmosphere-darkness: .38;
+}
+#page-atmosphere::before {
+  background: linear-gradient(180deg,
+    rgba(5,6,9,calc(var(--atmosphere-darkness, .38) * .72)) 0%,
+    rgba(5,6,9,calc(var(--atmosphere-darkness, .38) + .08)) 42%,
+    rgba(5,6,9,clamp(0,calc(var(--atmosphere-darkness, .38) + .22),.96)) 100%) !important;
+}
+#page-atmosphere img,
+#page-atmosphere.is-watch-background img {
+  filter: blur(var(--atmosphere-blur, 22px)) saturate(1.14) !important;
+  opacity: .68 !important;
+  transform: scale(1.18);
+}
+html[data-theme="light"] #page-atmosphere::before {
+  background: linear-gradient(180deg,
+    rgba(244,242,238,calc(var(--atmosphere-darkness, .38) * .38)) 0%,
+    rgba(244,242,238,calc(var(--atmosphere-darkness, .38) * .72)) 48%,
+    rgba(244,242,238,clamp(.08,calc(var(--atmosphere-darkness, .38) + .10),.9)) 100%) !important;
+}
+
+/* The foreground poster fades into the same blurred artwork layer behind the page.
+   No negative hero margin: the next section starts after the hero, never halfway over it. */
+.hero {
+  min-height: 86svh !important;
+  margin-bottom: 0 !important;
+  padding-bottom: clamp(44px, 6vh, 66px) !important;
+  isolation: isolate;
+  overflow: hidden;
+}
+.hero-bg {
+  inset: -18px !important;
+  background: transparent !important;
+  animation-duration: 22s !important;
+}
+.hero-bg img {
+  -webkit-mask-image: linear-gradient(180deg,#000 0%,#000 48%,rgba(0,0,0,.72) 65%,rgba(0,0,0,.28) 82%,transparent 100%);
+  mask-image: linear-gradient(180deg,#000 0%,#000 48%,rgba(0,0,0,.72) 65%,rgba(0,0,0,.28) 82%,transparent 100%);
+}
+.hero-overlay {
+  background: linear-gradient(90deg,rgba(5,5,5,.91) 0%,rgba(5,5,5,.69) 33%,rgba(5,5,5,.25) 69%,rgba(5,5,5,.45) 100%),
+    linear-gradient(180deg,rgba(5,5,5,.18) 0%,transparent 40%,rgba(5,5,5,.12) 68%,transparent 100%) !important;
+  -webkit-mask-image: linear-gradient(180deg,#000 0%,#000 52%,rgba(0,0,0,.68) 72%,transparent 100%);
+  mask-image: linear-gradient(180deg,#000 0%,#000 52%,rgba(0,0,0,.68) 72%,transparent 100%);
+}
+.hero::after {
+  height: clamp(180px, 25vw, 340px) !important;
+  background: linear-gradient(180deg,transparent 0%,rgba(5,6,8,.13) 42%,rgba(5,6,8,.22) 70%,transparent 100%) !important;
+}
+.continue-watching-section { margin-top: 0 !important; padding-top: 26px !important; z-index: 2; }
+
+/* A visible accent line on every resume card, without inventing a progress percentage. */
+.continue-progress-track {
+  height: 4px !important;
+  overflow: hidden;
+  background: color-mix(in srgb,var(--accent) 25%,rgba(255,255,255,.13)) !important;
+  box-shadow: 0 0 12px -5px var(--accent-glow);
+}
+.continue-progress-track i {
+  min-width: 0;
+  background: linear-gradient(90deg,var(--accent),var(--accent-2)) !important;
+  box-shadow: 0 0 12px var(--accent-glow);
+  transition: width .28s ease-out !important;
+}
+
+/* The logo row is intentionally logo-only: no tile panels, text captions or generic providers. */
+.provider-section .provider-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: clamp(24px,4vw,56px) !important;
+  min-height: 96px !important;
+  padding: 12px 8px 16px !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+}
+.provider-section .provider-tile,
+.provider-section .provider-tile:hover,
+.provider-section .provider-tile:focus-visible {
+  flex: 0 0 clamp(116px,13vw,170px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 64px !important;
+  height: 64px !important;
+  padding: 4px 7px !important;
+  gap: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline-offset: 5px;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  text-decoration: none !important;
+}
+.provider-section .provider-tile::before,
+.provider-section .provider-tile::after { content: none !important; display: none !important; }
+.provider-section .provider-logo-frame {
+  display: grid !important;
+  place-items: center !important;
+  width: 100% !important;
+  height: 56px !important;
+  min-height: 0 !important;
+  flex: 0 0 56px !important;
+}
+.provider-section .provider-logo-frame img {
+  display: block !important;
+  width: 100% !important;
+  height: 56px !important;
+  max-width: 100% !important;
+  max-height: 56px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  filter: drop-shadow(0 3px 12px rgba(0,0,0,.13));
+}
+.provider-section .provider-title,
+.provider-section .provider-tile > strong { display: none !important; }
+.provider-section .provider-logo-fallback.visible:not([hidden]),
+.provider-section .provider-initials {
+  display: grid !important;
+  place-items: center !important;
+  width: 100% !important;
+  height: 56px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  text-align: center !important;
+}
+.provider-section .provider-tile:hover img,
+.provider-section .provider-tile:focus-visible img {
+  filter: drop-shadow(0 0 14px var(--accent-glow)) !important;
+  transform: translateY(-2px) scale(1.025);
+}
+
+/* Accent appears as a restrained light source across active and primary UI states. */
+.btn.primary,
+.download-start,
+button[data-open-download] {
+  background: var(--accent) !important;
+  color: var(--accent-ink) !important;
+  border-color: transparent !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb,var(--accent) 13%,transparent),
+    0 8px 25px -15px var(--accent-glow), 0 0 18px -13px var(--accent) !important;
+}
+.btn.primary:hover,
+.download-start:hover,
+button[data-open-download]:hover {
+  box-shadow: 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent),
+    0 10px 29px -14px var(--accent-glow), 0 0 25px -13px var(--accent) !important;
+}
+.btn.icon-only.is-saved,
+.hero-save-button.is-saved { color: var(--accent) !important; }
+.hero-save-button,
+.detail-save-btn { width: 42px !important; min-width: 42px !important; height: 42px !important; min-height: 42px !important; padding: 0 !important; border-radius: 50% !important; }
+.hero-save-button { border: 1px solid color-mix(in srgb,var(--accent) 38%,var(--border)) !important; }
+.hero-save-button:hover,
+.detail-save-btn:hover { box-shadow: 0 0 19px -10px var(--accent-glow) !important; }
+.movie-card:hover .poster-wrap::after,
+.movie-card:focus-visible .poster-wrap::after {
+  opacity: .86 !important;
+  background: var(--accent) !important;
+  box-shadow: 0 0 22px var(--accent-glow);
+}
+.movie-card:hover .poster-wrap,
+.movie-card:focus-visible .poster-wrap {
+  box-shadow: 0 28px 45px -30px rgba(0,0,0,.86), 0 0 0 1px color-mix(in srgb,var(--accent) 21%,transparent), 0 18px 36px -20px var(--accent-glow) !important;
+}
+.watch-episode.active,
+.watch-episode[aria-current="true"] {
+  box-shadow: inset 3px 0 0 var(--accent), 0 0 20px -14px var(--accent-glow) !important;
+}
+.source-pill.active,
+.season-tab.active,
+.episode-pill.active {
+  box-shadow: 0 0 18px -12px var(--accent-glow) !important;
+}
+
+/* The accent fill was masking the active Home icon because its foreground reused the accent. */
+.bottom-liquid-indicator { z-index: 0 !important; pointer-events: none !important; }
+.bottom-nav-link { position: relative !important; z-index: 2 !important; min-width: 0; color: var(--text) !important; }
+.bottom-nav-link.active,
+.bottom-nav-link.active:hover {
+  color: var(--accent-ink) !important;
+  background: transparent !important;
+  text-shadow: none !important;
+}
+.bottom-nav-link.active .icon,
+.bottom-nav-link.active .icon svg,
+.bottom-nav-link.active span {
+  color: var(--accent-ink) !important;
+  stroke: var(--accent-ink) !important;
+  fill: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.bottom-nav-link .icon svg { display: block !important; width: 100%; height: 100%; stroke: currentColor !important; }
+.site-header .header-icon,
+.site-header .header-icon:hover,
+.site-header .header-icon.active,
+.nav-link,.nav-link:hover,
+.btn.secondary,.btn.ghost,.btn.icon-only,.rail-btn,.season-tab,.season-picker-btn,.episode-pill,.source-pill,.server-move {
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none;
+}
+.site-header .header-icon { color: var(--text) !important; }
+.site-header .header-icon svg,
+.season-picker-btn .icon svg,
+.season-option .icon svg,
+.filter-select .icon svg,
+.setting-select .icon svg,
+.server-item .icon svg,
+.server-move svg { stroke: currentColor !important; opacity: 1 !important; visibility: visible !important; }
+.server-item .server-move,
+.server-item .server-move:visited { color: var(--text) !important; opacity: 1 !important; border: 1px solid color-mix(in srgb,var(--text) 16%,transparent) !important; }
+.server-item .server-move:hover:not(:disabled) { color: var(--accent) !important; border-color: color-mix(in srgb,var(--accent) 55%,transparent) !important; box-shadow: 0 0 15px -10px var(--accent-glow) !important; }
+.server-item .server-move:disabled { color: var(--muted) !important; opacity: .58 !important; }
+.season-picker-btn .icon,
+.season-option .icon,
+.filter-select .icon,
+.setting-select .icon { color: var(--text) !important; opacity: 1 !important; }
+
+/* Search suggestions remain one continuous list inside the glass panel, not cards inside a card. */
+.global-search-panel .search-results,
+.global-search-panel .search-results.global-search-results {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  padding: 6px 0 0 !important;
+}
+.global-search-panel .global-search-item {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.global-search-panel .global-search-item:hover,
+.global-search-panel .global-search-item:focus-visible { background: rgba(255,255,255,.045) !important; }
+.global-search-type {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: var(--muted) !important;
+  padding-inline: 4px !important;
+}
+
+/* Top 10 numbers become an intentional accent marker instead of a barely visible watermark. */
+.rank-mark {
+  color: var(--accent) !important;
+  opacity: .94 !important;
+  font-size: clamp(66px, 8.8vw, 112px) !important;
+  letter-spacing: -.11em !important;
+  left: -7px !important;
+  bottom: 22px !important;
+  line-height: .78 !important;
+  -webkit-text-stroke: 1px color-mix(in srgb,var(--accent-2) 48%,transparent);
+  text-shadow: 0 3px 18px var(--accent-glow), 0 0 24px color-mix(in srgb,var(--accent) 20%,transparent);
+}
+.top-ten-section .movie-card .poster-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg,transparent 40%,rgba(0,0,0,.25) 100%);
+}
+
+/* Slider controls for background clarity are compact and keyboard-accessible. */
+.atmosphere-controls {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 14px;
+  margin: 6px 0 18px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 17px;
+  background: color-mix(in srgb,var(--surface-solid) 42%,transparent);
+}
+.atmosphere-control { min-width: 0; }
+.atmosphere-control .range-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.atmosphere-control .range-head label { color: var(--text); font-size: 10px; font-weight: 800; }
+.atmosphere-control output { color: var(--accent); font-variant-numeric: tabular-nums; font-size: 10px; font-weight: 850; }
+.atmosphere-control input[type="range"] { display: block; width: 100%; accent-color: var(--accent); cursor: pointer; }
+.atmosphere-control .gradient-range-scale { display: flex; justify-content: space-between; gap: 6px; margin-top: 7px; color: var(--muted); font-size: 8px; }
+
+/* Animation/performance and narrow-screen overflow audit. Keep motion but avoid costly layout work. */
+:where(.movie-card,.poster-wrap,.poster-wrap img,.bottom-nav-link,.bottom-liquid-indicator,.hero-bg,.hero-content,.global-search-panel,.global-search-item,.provider-tile) {
+  transition-property: transform, opacity, color, background-color, box-shadow, border-color !important;
+}
+.movie-card { will-change: auto !important; }
+.movie-card:hover,
+.movie-card:focus-visible { will-change: transform; }
+.poster-wrap img { will-change: auto !important; }
+.hero-bg { will-change: transform; }
+#page-atmosphere { will-change: auto; }
+html,body,#app { max-width: 100%; overflow-x: clip; }
+.page,.page-shell,.watch-page,.details-hero,.detail-body,.settings-page,.settings-shell,.settings-content,.catalog-hero,.footer { min-width: 0; max-width: 100%; }
+.card-row,.rank-row,.provider-row,.source-pills,.episode-grid,.server-list { min-width: 0; max-width: 100%; }
+@media (max-width: 640px) {
+  .hero { min-height: 78svh !important; padding-top: 112px !important; padding-bottom: 46px !important; }
+  .hero h1 { max-width: 100%; overflow-wrap: anywhere; }
+  .hero-actions { display: flex !important; align-items: center; flex-wrap: wrap !important; gap: 9px !important; }
+  .hero-actions .btn.primary { flex: 0 0 auto; width: auto; }
+  .hero-actions .hero-action-circle { min-height: 42px !important; }
+  .hero-save-button,.detail-save-btn { flex: 0 0 42px !important; }
+  .continue-watching-section { padding-top: 16px !important; }
+  .provider-section .provider-row { gap: 20px !important; }
+  .provider-section .provider-tile { flex-basis: 112px !important; height: 56px !important; min-height: 56px !important; }
+  .provider-section .provider-logo-frame,.provider-section .provider-logo-frame img { height: 48px !important; max-height: 48px !important; flex-basis: 48px !important; }
+  .rank-mark { font-size: clamp(56px,19vw,82px) !important; bottom: 18px !important; }
+  .atmosphere-controls { grid-template-columns: minmax(0,1fr); padding: 13px; }
+  .global-search-panel { width: calc(100vw - 20px) !important; max-width: calc(100vw - 20px) !important; }
+  .global-search-panel .search-results { max-width: 100%; }
+  .global-search-item { grid-template-columns: 42px minmax(0,1fr) auto 14px; gap: 9px !important; }
+  .global-search-item img { width: 42px !important; height: 62px !important; }
+  .watch-layout,.watch-layout.has-episodes,.watch-layout.movie-watch-layout { min-width: 0 !important; max-width: 100% !important; }
+  .watch-heading-actions { min-width: 0; flex-wrap: wrap; }
+}
+@media (max-width: 380px) {
+  .global-search-type { display: none !important; }
+  .bottom-liquid-nav { grid-template-columns: repeat(5,minmax(0,1fr)) !important; }
+  .bottom-nav-link { min-width: 0 !important; font-size: 8px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-bg { animation: none !important; }
+  #page-atmosphere,#page-atmosphere img { transition: none !important; }
+}
+
+/* Final corrections for the artwork/hero seam and icon contrast. */
+#page-atmosphere { z-index: 0 !important; }
+#page-atmosphere img,
+#page-atmosphere.is-watch-background img {
+  opacity: .84 !important;
+  filter: blur(var(--atmosphere-blur,22px)) saturate(1.12) !important;
+  transform: scale(1.2) !important;
+}
+#page-atmosphere::before {
+  background: linear-gradient(180deg,
+    rgba(5,6,9,calc(var(--atmosphere-darkness,.28) * .5)) 0%,
+    rgba(5,6,9,calc(var(--atmosphere-darkness,.28) + .04)) 44%,
+    rgba(5,6,9,clamp(.05,calc(var(--atmosphere-darkness,.28) + .14),.88)) 100%) !important;
+}
+html[data-theme="light"] #page-atmosphere::before {
+  background: linear-gradient(180deg,
+    rgba(244,242,238,calc(var(--atmosphere-darkness,.28) * .24)) 0%,
+    rgba(244,242,238,calc(var(--atmosphere-darkness,.28) * .6)) 48%,
+    rgba(244,242,238,clamp(.06,calc(var(--atmosphere-darkness,.28) + .08),.85)) 100%) !important;
+}
+.hero {
+  margin-bottom: 0 !important;
+  min-height: 86svh !important;
+  padding-bottom: clamp(30px,4vh,52px) !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+}
+.hero-content {
+  transform: translate3d(0,clamp(8px,1.8vh,20px),0) !important;
+  z-index: 3 !important;
+}
+.hero-bg { background: transparent !important; }
+.hero-bg img {
+  -webkit-mask-image: linear-gradient(180deg,#000 0%,#000 46%,rgba(0,0,0,.78) 62%,rgba(0,0,0,.3) 80%,transparent 100%) !important;
+  mask-image: linear-gradient(180deg,#000 0%,#000 46%,rgba(0,0,0,.78) 62%,rgba(0,0,0,.3) 80%,transparent 100%) !important;
+}
+.hero-overlay {
+  background: linear-gradient(90deg,rgba(5,5,5,.86) 0%,rgba(5,5,5,.58) 34%,rgba(5,5,5,.16) 68%,rgba(5,5,5,.32) 100%),
+    linear-gradient(180deg,rgba(5,5,5,.10) 0%,transparent 44%,rgba(5,5,5,.12) 72%,transparent 100%) !important;
+  -webkit-mask-image: linear-gradient(180deg,#000 0%,#000 49%,rgba(0,0,0,.62) 73%,transparent 100%) !important;
+  mask-image: linear-gradient(180deg,#000 0%,#000 49%,rgba(0,0,0,.62) 73%,transparent 100%) !important;
+}
+.hero::after {
+  height: clamp(180px,24vw,330px) !important;
+  background: linear-gradient(180deg,transparent 0%,rgba(5,6,8,.08) 44%,rgba(5,6,8,.17) 70%,transparent 100%) !important;
+}
+.continue-watching-section {
+  position: relative !important;
+  margin-top: 0 !important;
+  padding-top: 24px !important;
+  z-index: 1 !important;
+  background: transparent !important;
+}
+.continue-progress-track {
+  height: 4px !important;
+  background: color-mix(in srgb,var(--accent) 58%,rgba(255,255,255,.1)) !important;
+  box-shadow: 0 0 14px -4px var(--accent-glow) !important;
+}
+.continue-progress-track i {
+  background: linear-gradient(90deg,var(--accent),var(--accent-2)) !important;
+  box-shadow: 0 0 10px -2px var(--accent-glow) !important;
+}
+
+/* The active navigation item remains legible above the orange sliding indicator. */
+.bottom-liquid-nav { isolation: isolate !important; }
+.bottom-liquid-indicator { z-index: 1 !important; }
+.bottom-nav-link,
+.bottom-nav-link.active,
+.bottom-nav-link.active:hover {
+  position: relative !important;
+  z-index: 2 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  color: var(--text) !important;
+  background: transparent !important;
+  -webkit-text-fill-color: currentColor !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.bottom-nav-link.active,
+.bottom-nav-link.active:hover { color: var(--accent-ink) !important; -webkit-text-fill-color: var(--accent-ink) !important; }
+.bottom-nav-link > .icon,
+.bottom-nav-link > .icon svg,
+.bottom-nav-link > .bottom-nav-label {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  position: relative !important;
+  z-index: 3 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.bottom-nav-link > .icon svg { width: 17px !important; height: 17px !important; stroke: currentColor !important; fill: none !important; overflow: visible !important; }
+.bottom-nav-link.active > .icon svg { stroke: var(--accent-ink) !important; }
+.bottom-nav-label { line-height: 1.05 !important; white-space: nowrap !important; }
+
+/* Keep every icon in source controls visible on both light and dark surfaces. */
+.server-item .grip,
+.server-item .grip .icon,
+.server-item .grip .icon svg,
+.server-item .server-move,
+.server-item .server-move svg,
+.season-picker-btn .icon,
+.season-picker-btn .icon svg,
+.season-option .icon,
+.season-option .icon svg,
+.server-option .icon,
+.server-option .icon svg {
+  color: var(--text) !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.server-item .grip .icon { display: inline-flex !important; }
+.server-item .grip .icon svg { width: 15px !important; height: 15px !important; }
+
+/* Subtle orange light should accompany active controls and poster hover, never a neon border. */
+.btn.primary,
+.download-start,
+button[data-open-download] {
+  box-shadow: 0 0 0 1px color-mix(in srgb,var(--accent) 12%,transparent),
+    0 7px 24px -15px var(--accent-glow), 0 0 20px -14px var(--accent) !important;
+}
+.btn.primary:hover,
+.download-start:hover,
+button[data-open-download]:hover,
+.hero-save-button:hover,
+.detail-save-btn:hover {
+  box-shadow: 0 0 0 1px color-mix(in srgb,var(--accent) 22%,transparent),
+    0 9px 28px -14px var(--accent-glow), 0 0 23px -12px var(--accent) !important;
+}
+.movie-card:hover .poster-wrap,
+.movie-card:focus-visible .poster-wrap {
+  box-shadow: 0 28px 42px -29px rgba(0,0,0,.88),
+    0 0 0 1px color-mix(in srgb,var(--accent) 28%,transparent),
+    0 18px 34px -18px var(--accent-glow) !important;
+}
+.movie-card:hover .poster-wrap::after,
+.movie-card:focus-visible .poster-wrap::after {
+  opacity: .78 !important;
+  background: var(--accent) !important;
+  box-shadow: 0 0 24px var(--accent-glow) !important;
+}
+.source-pill.active,
+.season-tab.active,
+.episode-pill.active,
+.watch-episode.active,
+.watch-episode[aria-current="true"] {
+  box-shadow: 0 0 20px -13px var(--accent-glow) !important;
+}
+
+/* Providers are transparent wordmarks, not individual cards; broken marks fall back cleanly. */
+.provider-section .provider-tile,
+.provider-section .provider-tile:hover,
+.provider-section .provider-tile:focus-visible {
+  background: transparent !important;
+  border: 0 !important;
+  outline-offset: 4px;
+  box-shadow: none !important;
+}
+.provider-section .provider-logo-frame { background: transparent !important; border: 0 !important; box-shadow: none !important; }
+.provider-section .provider-logo-fallback.visible:not([hidden]),
+.provider-section .provider-initials {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: var(--text) !important;
+}
+
+/* Search suggestions are a single list, and Movie/Series are plain metadata rather than pills. */
+#global-search-results,
+.global-search-panel .search-results,
+.global-search-panel .search-results.global-search-results {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 6px 0 0 !important;
+}
+.global-search-panel .global-search-item,
+.global-search-panel .global-search-item:hover,
+.global-search-panel .global-search-item:focus-visible {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.global-search-panel .global-search-type,
+.global-search-panel .global-search-type::before,
+.global-search-panel .global-search-type::after {
+  display: inline !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Settings sliders and title rails remain constrained to the viewport on small browsers. */
+.atmosphere-controls,.atmosphere-control,.range-head,.settings-content,.settings-section { min-width: 0 !important; max-width: 100% !important; }
+input[type="range"] { max-width: 100%; }
+.rank-mark {
+  color: var(--accent) !important;
+  opacity: 1 !important;
+  -webkit-text-stroke: 1.4px color-mix(in srgb,var(--accent-2) 76%,transparent) !important;
+  text-shadow: 0 3px 18px var(--accent-glow), 0 0 22px color-mix(in srgb,var(--accent) 34%,transparent) !important;
+  z-index: 2 !important;
+}
+@media (max-width: 640px) {
+  .hero { min-height: min(740px,84svh) !important; padding: 112px 20px 92px !important; }
+  .hero-content { transform: translate3d(0,8px,0) !important; }
+  .continue-watching-section { padding-top: 16px !important; }
+  .provider-section .provider-row { gap: 22px !important; }
+  .provider-section .provider-tile { flex-basis: 108px !important; }
+  .bottom-nav-link > .icon svg { width: 16px !important; height: 16px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-bg,.movie-card,.poster-wrap img,.bottom-liquid-indicator,.global-search-item { animation: none !important; transition-duration: .001ms !important; }
+}

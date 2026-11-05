@@ -3,7 +3,9 @@
 Updated from the latest smooth build.
 
 ## Startup, features and source hub
-- A short projector-iris startup sequence runs only on initial document load, respects reduced-motion preferences, and has a hard failsafe so slow catalogue APIs cannot leave it stuck.
+- A minimal branded startup animation runs only on initial document load, respects reduced-motion preferences, and has a hard failsafe so slow catalogue APIs cannot leave it stuck.
+- Appearance settings offer a blurred artwork background tied to the current homepage feature, or the existing ambient gradient. During playback, the background uses the selected title artwork and follows the selected episode still for series.
+- The fresh-install accent is Orange / Ember, with transparent non-primary navigation/action buttons, a visible provider label row, and darker, more strongly blurred dropdown suggestions.
 - `/features` documents the current discovery, browsing, source selection, episode navigation, personal library, downloads and customization capabilities. Subtitle/audio controls are explicitly described as dependent on the chosen third-party embedded player and its available tracks.
 - `/gitstore` links the project GitHub repository, source ZIP and HTTPS clone command, and maps the key application directories. It does not fabricate live repository activity, counts or release status.
 - See `STARTUP-FEATURES-GITSTORE-CHANGELOG.md` for implementation notes and verification results.

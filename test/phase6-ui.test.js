@@ -68,6 +68,14 @@ test('expensive continuous card and background animations are disabled while cor
 });
 
 
+
+test('TV catalogue survives optional genre failures and has a useful fallback if live discovery errors', () => {
+  const catalog = app.split('async function renderCatalog(')[1]?.split('function openGlobalSearch(')[0] || '';
+  assert.match(catalog, /api\(`\/api\/genres\/\$\{isTv\?'tv':'movie'\}`\)\.catch\(\(\) => \(\{ genres: \[\] \}\)\)/);
+  assert.match(catalog, /if \(isUnfilteredTV && !cachedTV\.length\)[\s\S]*?api\('\/api\/home'\)/);
+  assert.match(catalog, /data-catalog-retry/);
+});
+
 test('watch page has a two-column player/episode layout with thumbnail summaries and season tabs', () => {
   assert.match(app, /class="watch-layout \${isSeries \? 'has-episodes'/);
   assert.match(app, /class="watch-episode \${ep\.episode_number === episode/);
